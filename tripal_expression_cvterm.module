@@ -387,3 +387,24 @@ print "I am here:chado_expression_cvterm_update\n";
       array('%values' => print_r($values, TRUE)));
   }
 }
+
+function chado_expression_cvterm_delete($node) {
+print "I am here: chado_expression_cvterm_delete\n";
+  // get the expression_cvterm id from the node
+  $expression_cvterm_id  = chado_get_id_from_nid('expression_cvterm', $node->nid);
+  // if we don't have a expression_cvterm id for this node then this isn't a node of type
+  // chado_expression_cvterm or the entry in the chado_expression_cvterm table was lost.
+  if (!$expression_cvterm_id) {
+    return;
+  }
+  // remove the entry in the chado_exapmle table linking the deleted
+  // Drupal node with the data in Chado
+  $sql_del = "DELETE FROM {chado_expression_cvterm} WHERE nid = :nid AND vid = :vid";
+  db_query($sql_del, array(':nid' => $node->nid, ':vid' => $node->vid));
+  // Remove data from expression_cvterm tables of Chado database. This will
+  // cause a cascade delete and remove all data in referencing tables
+  // for this expression_cvterm
+  chado_query("DELETE FROM {expression_cvterm} WHERE expression_cvterm_id = :expression_cvterm_id", array(':expression_cvterm_id' => $expression_cvterm_id));
+  // inform the user that the data was deleted
+  drupal_set_message(t("The expression_cvterm and all associated data were removed from Chado"));
+}
