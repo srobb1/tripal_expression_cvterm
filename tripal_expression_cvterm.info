@@ -1,0 +1,6 @@
+name = Tripal Expression Cvterms  
+description = Syncs Cvterms that are associated with Expression Images And Features
+core = 7.x
+package = Tripal Extensions
+dependencies[] = tripal_core
+dependencies[] = trpdownload_api
