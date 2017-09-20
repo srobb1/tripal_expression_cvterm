@@ -241,3 +241,45 @@ function chado_expression_cvterm_chado_node_sync_select_query($query) {
   // Must return the updated query
   return $query;
 }
+
+
+/**
+ *  Implementation of hook_insert(). This function is called after the node is
+ * inserted into the database. We need it so that we can insert appropriate
+ * fields as provided by the user into the database. And so that we can link the
+ * new Drupal node to the data in Chado via the chado_example linking table. We
+ * can get to this function also during "syncing".
+ * With syncing, however, the data already exists in Chado and we do not want
+ * to try to re-add it. But we do need to add an entry to the chado_example
+ * table to link the Drupal node with the data in the 'example' table of Chado.
+ *
+ *  This function is not required if the hook_node_info() does not define
+ *  any custom node types.
+ *
+ * @ingroup tripal_example
+ */
+function chado_expression_cvterm_insert($node) {
+print "I am here chado_expression_cvterm_insert\n";
+  $expression_cvterm_id = '';
+  // if there is an expression_cvterm_id in the $node object then this must be a sync so
+  // we can skip adding the expression_cvterm as it is already there, although we do need
+  // to proceed with insertion into the chado/drupal linking table.
+  if (!property_exists($node, 'expression_cvterm_id')) {
+    // Add code later to create expression_cvterm based on form.
+  }
+  else {
+    $expression_cvterm_id = $node-> expression_cvterm_id;
+  }
+
+  // Make sure the entry for this expression_cvterm doesn't already exist in the
+  // chado_ expression_cvterm table if it doesn't exist then we want to add it.
+  // This is also how the linking record gets added during a sync.
+  $check_org_id = chado_get_id_from_nid('expression_cvterm', $node->nid);
+  if (!$check_org_id) {
+    $record = new stdClass();
+    $record->nid = $node->nid;
+    $record->vid = $node->vid;
+    $record-> expression_cvterm_id = $expression_cvterm_id;
+    drupal_write_record('chado_ expression_cvterm', $record);
+  }
+}
