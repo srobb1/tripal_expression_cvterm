@@ -359,3 +359,31 @@ print "I am here: chado_expression_cvterm_form\n";
   // return the form
   return $form;
 }
+
+/**
+ * Implementation of hook_update(). This function runs after the node has been
+ * inserted into the Drupal schema and allows us to update the record in Chado.
+ *
+ * This function is not required if the hook_node_info() does not define any
+ * custom node types.
+ *
+ * @ingroup tripal_example
+ */
+function chado_expression_cvterm_update($node) {
+print "I am here:chado_expression_cvterm_update\n";
+  // be sure to always trim text fields
+  // use the chado_update_record() function to update the record
+  $match = array(
+    'expression_cvterm_id' => $expression_cvterm_id,
+  );
+  $values = array(
+//    'uniquename' => $node->uniquename,
+  );
+  $options = array('return_record' => TRUE);
+  $status = chado_update_record('expression_cvterm', $match, $values, $options);
+  if (!$status) {
+    drupal_set_message(t('Unable to update example.'), 'warning');
+    tripal_report_error('tripal_example', TRIPAL_WARNING, 'Update example: Unable to update example where values: %values',
+      array('%values' => print_r($values, TRUE)));
+  }
+}
