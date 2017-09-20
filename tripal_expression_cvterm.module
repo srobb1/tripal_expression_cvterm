@@ -317,3 +317,45 @@ print "I am here: chado_expression_cvterm_validate\n";;
     return;
   }
 }
+
+
+function chado_expression_cvterm_form($node, &$form_state) {
+print "I am here: chado_expression_cvterm_form\n";
+  // EXPLANATION: This function should construct a form array that is used by
+  // Drupal to construct a form for inserting or editing our new node type.
+  // See this page for information about the Form API:
+  // https://api.drupal.org/api/drupal/includes!form.inc/group/form_api/7
+  //
+  // The code below is laid out in the following order
+  // 1) Set default values
+  // 2) Add form elements used by this node type
+  // 3) Use the Tripal API to add form elements for properties,
+  //    dbxref's and relationships
+  //
+  // For the example code below we assume that the fake 'example' table only has
+  // a uniquename, organism_id, type_id and example_id.
+  $form = array();
+  // Default values can come in the following ways:
+  //
+  // 1) as elements of the $node object. This occurs when editing an existing
+  //    example
+  // 2) in the $form_state['values'] array which occurs on a failed validation
+  //    or ajax callbacks from non submit form elements
+  // 3) in the $form_state['input'[ array which occurs on ajax callbacks from
+  //    submit form elements and the form is being rebuilt
+  //
+  // set form field defaults
+  // SET FORM DEFAULTS
+  //---------------------------------------------
+  // initialize the defaults for the form fields
+  // if we are editing an existing node then the 'example' record from Chado
+  // is already part of the node, so we set the defaults from that object
+  // Adds the form elements to your current form
+  $details = array(
+    // the name of the prop table
+    'chado_id' => $expression_cvterm_id,
+  );
+  chado_add_node_form_relationships($form, $form_state, $details);
+  // return the form
+  return $form;
+}
