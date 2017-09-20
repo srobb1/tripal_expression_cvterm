@@ -205,16 +205,11 @@ function chado_expression_cvterm_chado_node_sync_select_query($query) {
   // Provide any join you may need to the joins array. Be sure to wrap the
   // table name in curly brackets.
   $query['joins'] = array();
-//  $query['joins'][] = ', {feature} feature';
-//  $query['joins'][] = ', {feature_expression} feature_expression';
-//  $query['joins'][] = ', {cvterm} cvterm';
-//  $query['joins'][] = ', {organism} organism';
 
     $query['joins'][] = 'INNER JOIN {feature_expression} feature_expression ON expression_cvterm.expression_id = feature_expression.expression_id'; 
     $query['joins'][] = 'INNER JOIN {cvterm} cvterm ON expression_cvterm.cvterm_id = cvterm.cvterm_id';
     $query['joins'][] = 'INNER JOIN {feature} feature ON feature.feature_id = feature_expression.feature_id'; 
     $query['joins'][] = 'INNER JOIN {organism} organism ON feature.organism_id = organism.organism_id';
-//    $query['joins'][] = 'INNER JOIN expression_cvterm ON expression_cvterm.cvterm_type_id = :cv_id'; 
   // base table: expression_cvterm already included
 
   $category = 'tripal_expression_cvterm';
@@ -241,12 +236,7 @@ function chado_expression_cvterm_chado_node_sync_select_query($query) {
   }
 
   // add more where_clauses
-//   $query['where_clauses'][$category][] = 'feature.feature_id = feature_expression.feature_id';
-//   $query['where_clauses'][$category][] = 'expression_cvterm.expression_id = feature_expression.expression_id';
-//   $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_id = cvterm.cvterm_id';
    $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_type_id = :cv_id';
-//   $query['where_clauses'][$category][] = 'feature.organism_id = organism.organism_id';
-   // organism where clause already included
  
   // Must return the updated query
   return $query;
