@@ -283,3 +283,37 @@ print "I am here chado_expression_cvterm_insert\n";
     drupal_write_record('chado_ expression_cvterm', $record);
   }
 }
+
+
+/**
+ * Implementation of hook_validate
+ *
+ * This function validates a form prior to insert or update. If an error is
+ * detected, it sets the error using form_set_error() which takes the user back
+ * to the form to make corrections.
+ *
+ * This validation is being used for three activities:
+ *   CASE A: Update a node that exists in both Drupal and Chado
+ *   CASE B: Synchronizing a node from Chado to Drupal
+ *   CASE C: Inserting a new node that exists in neither Drupal nor Chado
+ *
+ * @param $node
+ *
+ *
+ * @ingroup tripal_example
+ */
+function chado_expression_cvterm_validate($node, $form, &$form_state) {
+print "I am here: chado_expression_cvterm_validate\n";;
+  // We only want to validate when the node is saved.
+  // Since this validate can be called on AJAX and Deletion of the node
+  // we need to make this check to ensure queries are not executed
+  // without the proper values.
+  if(property_exists($node, "op") and $node->op != 'Save') {
+    return;
+  }
+  // we are syncing if we do not have a node ID but we do have a example_id. We
+  // don't need to validate during syncing so just skip it.
+  if (!property_exists($node, 'nid') and property_exists($node, 'expression_cvterm_id') and $node->expression_cvterm_id != 0) {
+    return;
+  }
+}
