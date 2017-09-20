@@ -1,0 +1,216 @@
+<?php
+/**
+ * @file
+ * Installation of the example module
+ */
+
+/**
+ * Implements hook_disable().
+ *
+ * Perform actions when the module is disabled by the site administrator
+ *
+ * @ingroup tripal_expression_cvterm
+ */
+function tripal_expression_cvterm_disable() {
+
+  // EXPLANATION: If you are using Drupal Views you want to ensure that any
+  // default views that your module provides are disabled when the module is
+  // disabled. Default views are specified in the
+  // [module name].views.default.inc file. The following code will disable these
+  // views. If your module does not create any default views you can remove the
+  // following code.
+
+  // Disable all default views provided by this module
+  require_once("tripal_expression_cvterm.views_default.inc");
+  $views = tripal_expression_cvterm_views_default_views();
+  foreach (array_keys($views) as $view_name) {
+    tripal_disable_view($view_name,FALSE,array('suppress_error' => TRUE));
+  }
+
+}
+
+/**
+ * Implements hook_requirements().
+ *
+ * Performs check to see if all required dependencies are met. Drupal will
+ * automatically check for module dependencies but here you can check for other
+ * requirements.
+ *
+ * @ingroup tripal_expression_cvterm
+ */
+function tripal_expression_cvterm_requirements($phase) {
+
+
+  $requirements = array();
+  if ($phase == 'install') {
+    // EXPLANATION: It is essential that Chado be installed for almost all
+    // Tripal modules. Therefore, the following code checks to ensure Chado is
+    // installed and available. If your module does not require that Chado be
+    // installed, you can remove the following check.
+
+    // make sure chado is installed
+    if (!$GLOBALS["chado_is_installed"]) {
+      $requirements ['tripal_expression_cvterm'] = array(
+          'title' => "tripal_expression_cvterm",
+          'value' => "ERROR: Chado must be installed before this module can be enabled",
+          'severity' => REQUIREMENT_ERROR,
+      );
+    }
+  }
+  return $requirements;
+}
+
+/**
+ * Implements hook_install().
+ *
+ * Performs actions when the modules is first installed.
+ *
+ * @ingroup tripal_expression_cvterm
+ */
+function tripal_expression_cvterm_install() {
+
+  // EXPLANATION: Here is a good place to add any materialized views, controlled
+  // vocabularies CV, databases or CV terms needed by your module.
+  // To keep this module code short, create functions to do each of those tasks
+
+  // add any materialized view
+  tripal_expression_cvterm_add_mviews();
+
+
+}
+
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Performs actions when the modules is uninstalled.
+ *
+ * @ingroup tripal_expression_cvterm
+ */
+function tripal_expression_cvterm_uninstall() {
+
+}
+
+/**
+ * Implementation of hook_schema().
+ *
+ * Provides a list of tables to be created inside of the Drupal schema (the
+ * 'public' schema by default). It uses the Drupal Schema API array structure to
+ * define the table, its indexes and constraints.
+ *
+ * Schema API documentation is here:
+ * https://api.drupal.org/api/drupal/includes%21database%21schema.inc/group/schemaapi/7
+ *
+ * @ingroup tripal_expression_cvterm
+ */
+function tripal_expression_cvterm_schema() {
+
+  // EXPLANATION: If your module creates a node type for data in the Chado
+  // database then you probably need to link Drupal nodes with a respective ID
+  // in the Chado table. The following is an example array for a table that will
+  // link the 'chado_example' node type (created by this example module) with a
+  // record in the fake Chado example table. This table will link the 'nid' of
+  // the node with the 'example_id' of the example record.
+  $schema['chado_expression_cvterm'] = array(
+    'fields' => array(
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+       ),
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+       ),
+      'expression_cvterm_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'sync_date' => array(
+        'type' => 'int',
+        'not null' => FALSE,
+        'description' => 'UNIX integer sync date/time'
+      ),
+    ),
+    'indexes' => array(
+      'chado_expression_cvterm_idx1' => array('expression_cvterm_id')
+    ),
+    'unique keys' => array(
+      'chado_expression_cvterm_uq1' => array('nid', 'vid'),
+      'chado_expression_cvterm_uq2' => array('vid')
+    ),
+    'primary key' => array('nid'),
+  );
+
+  return $schema;
+};
+
+/**
+ * Creates a materialized view that stores the type & number of examples per
+ * organism.
+ *
+ * @ingroup tripal_expression_cvterm
+ */
+function tripal_expression_cvterm_add_mviews() {
+
+  // EXPLANATION: use the tripal_add_mview() function to add a materialized view
+  // needed by your module. If you have more than one materialized view it is
+  // best to create a single function for each one and call each function here.
+  // Otherwise this function can become quite long.
+
+}
+
+
+/**
+ * This is the required update for tripal_expression_cvterm.
+ */
+function tripal_expression_cvterm_update_7200() {
+  // EXPLANATION: as you create new releases of your module you may find that
+  // tables your module created, or data may need to be adjusted. This function
+  // allows you to do that. This function is executed using the
+  // http://[your site]/update.php  URL or using the drush command 'updatedb'.
+  // This function should be named according to the instructions provided here:
+  // https://api.drupal.org/api/drupal/modules%21system%21system.api.php/function/hook_update_N/7
+  //
+  // Make sure we have the full API loaded this will help during a
+  // site upgrade when the tripal_core module is disabled.
+  module_load_include('module', 'tripal_core', 'tripal_core');
+  tripal_core_import_api();
+
+  // it is good to wrap any database changes inside of a try catch block:
+  try {
+   // perform database changes
+  }
+  catch (\PDOException $e) {
+    $error = $e->getMessage();
+    throw new DrupalUpdateException('Could not apply updates: '. $error);
+  }
+}
+
+
+/**
+ * Implementation of hook_update_dependencies().
+ *
+ * It specifies a list of other modules whose updates must be run prior to
+ * this one.  It also ensures the the Tripal API is in scope for site
+ * upgrades when tripal_core is disabled.
+ */
+function tripal_expression_cvterm_update_dependencies() {
+
+  $dependencies = array();
+
+  // EXPLANATION: here we can specify which modules must be updated prior to
+  // applying the updates in this module. This is useful because it prevents
+  // updates from being executed out of order. The following example code shows
+  // that the 'tripal_expression_cvterm' module update number 7200 must be executed after
+  // the 'tripal_cv' module's 7200 update.
+  $dependencies['tripal_expression_cvterm'][7200] = array(
+    'tripal_cv' => 7200
+  );
+
+  return $dependencies;
+}
