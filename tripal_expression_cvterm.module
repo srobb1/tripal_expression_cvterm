@@ -348,15 +348,81 @@ print "I am here: chado_expression_cvterm_form\n";
   // SET FORM DEFAULTS
   //---------------------------------------------
   // initialize the defaults for the form fields
+  $expression_id   = '';
+  $cvterm_id = '';
+  $cvterm_type_id  = '';
+
   // if we are editing an existing node then the 'example' record from Chado
   // is already part of the node, so we set the defaults from that object
-  // Adds the form elements to your current form
-  $details = array(
-    // the name of the prop table
-    'chado_id' => $expression_cvterm_id,
+ if (property_exists($node, 'expression_cvterm')) {
+    $expression_cvterm = $node->expression_cvterm;
+    $expression_cvterm_id   = $expression_cvterm->expression_cvterm_id;
+    $expression_id   = $expression_cvterm->expression_id;
+    $cvterm_id  = $expression_cvterm->cvterm_id;
+    $cvterm_type_id  = $expression_cvterm->cvterm_type_id;
+    // keep track of the expression_cvterm id
+    $form['expression_cvterm_id'] = array(
+      '#type' => 'value',
+      '#value' => $expression_cvterm_id,
+    );
+  }
+
+  // if we are re constructing the form from a failed validation or ajax
+  // callback then use the $form_state['values'] values
+  if (array_key_exists('values', $form_state)) {
+     $expression_cvterm_id   = $form_state['values']['expression_cvterm_id'];
+     $expression_id = $form_state['values']['expression_id'];
+     $cvterm_id  = $form_state['values']['cvterm_id'];
+     $cvterm_type_id  = $form_state['values']['cvterm_type_id'];
+  }
+  // if we are re building the form from after submission (from ajax call) then
+  // the values are in the $form_state['input'] array
+  if (array_key_exists('input', $form_state) and !empty($form_state['input'])) {
+     $expression_cvterm_id   = $form_state['input']['expression_cvterm_id'];
+     $expression_id = $form_state['input']['expression_id'];
+     $cvterm_id  = $form_state['input']['cvterm_id'];
+     $cvterm_type_id  = $form_state['input']['cvterm__type_id'];
+  }
+
+
+  // FORM ELEMENTS
+  //---------------------------------------------
+  $form['expression_cvterm_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Expression CVterm ID'),
+    '#required' => TRUE,
+    '#default_value' => $expression_cvterm_id,
+    '#description' => t('Enter the expression cvterm id for this expression_cvterm. This name must be unique.'),
+    '#maxlength' => 255
   );
-  chado_add_node_form_relationships($form, $form_state, $details);
-  // return the form
+  // for the type_id we want to use the default vocabulary so that this field
+  // can have auto-complete functionality
+  $form['expression_id'] = array(
+    '#title'       => t('Expression ID'),
+    '#type'        => 'textfield',
+    '#description' => t("Choose the expression_id "),
+    '#required'    => TRUE,
+    '#default_value' => $expression_id,
+  );
+  // add a select box of organisms
+  $organisms = tripal_get_organism_select_options();
+  $form['cvterm_id'] = array(
+    '#title'       => t('cvterm_id'),
+    '#type'        => t('textfield'),
+    '#description' => t("Enter the cvterm_id"),
+    '#required'    => TRUE,
+    '#default_value' => $cvterm_id,
+  );
+  $form['cvterm_type_id'] = array(
+    '#title' => t('Description'),
+    '#type'        => t('textfield'),
+    '#required' => TRUE,
+    '#default_value' => $cvterm_type_id,
+    '#description' => t('Enter cvterm_type_id.'),
+  );
+
+
+
   return $form;
 }
 
@@ -407,4 +473,103 @@ print "I am here: chado_expression_cvterm_delete\n";
   chado_query("DELETE FROM {expression_cvterm} WHERE expression_cvterm_id = :expression_cvterm_id", array(':expression_cvterm_id' => $expression_cvterm_id));
   // inform the user that the data was deleted
   drupal_set_message(t("The expression_cvterm and all associated data were removed from Chado"));
+}
+
+
+/**
+ * Implement hook_access(). This hook provides instructions to Drupal for which
+ * users can access the custom content types created in the function above. The
+ * available permissions are set in the chado_example_permissions() hook in the
+ * tripal_example.module file. This hook is not needed if no node types were
+ * defined in the hook_node_info() hook.
+ *
+ * @return
+ * This function should return null if it does not specifically deny access.
+ * This allows for other mechanisms to to deny or reject access. If the return
+ * value is TRUE then access is granted regardless of any other rules that might
+ * be implemented by other modules.
+ */
+function tripal_expression_cvterm_node_access($node, $op, $account) {
+print "i am here tripal_expression_cvterm_node_access\n";
+  $node_type = $node;
+  if (is_object($node)) {
+    $node_type = $node->type;
+  }
+  // EXPLANATION:  in the tripal_expression_cvterm_permissions() function we created the
+  // permission types that are used here to check for access permissions to the
+  // 'chado_exmaple' node type.
+  if($node_type == 'chado_expression_cvterm') {
+    if ($op == 'create') {
+      if (!user_access('create chado_expression_cvterm content', $account)) {
+        return NODE_ACCESS_DENY;
+      }
+      return NODE_ACCESS_ALLOW;
+    }
+    if ($op == 'update') {
+      if (!user_access('edit chado_expression_cvterm content', $account)) {
+        return NODE_ACCESS_DENY;
+      }
+    }
+    if ($op == 'delete') {
+      if (!user_access('delete chado_expression_cvterm content', $account)) {
+        return NODE_ACCESS_DENY;
+      }
+    }
+    if ($op == 'view') {
+      if (!user_access('access chado_expression_cvterm content', $account)) {
+        return NODE_ACCESS_DENY;
+      }
+    }
+  }
+  return NODE_ACCESS_IGNORE;
+}
+
+
+/**
+ * Implementation of hook_load(). This function is necessary to load into the
+ * $node object the fields of the table form Chado. For example for the example
+ * table, the chado_example_load() function adds in a example object which
+ * contains all of the fields and sub objects for data in tables with foreign
+ * key relationships.
+ *
+ * This function is not required if the hook_node_info() does not define any
+ * custom node types.
+ *
+ * @ingroup tripal_example
+ */
+function chado_expression_cvterm_load($nodes) {
+print "i am here: chado_expression_cvterm_load\n";
+  // EXPLANATION: when displaying or node or accessing the node in a template
+  // we need the data from Chado. This function finds the record in Chado that
+  // this node belongs to and adds the record.
+  // there may be multiple nodes that get passed in so we have to iterate
+  // through them all
+  foreach ($nodes as $nid => $node) {
+    // find the expression_cvterm and add in the details
+    $expression_cvterm_id = chado_get_id_from_nid('expression_cvterm', $nid);
+    // if the nid does not have a matching record then skip this node.
+    // this can happen with orphaned nodes.
+    if (!$expression_cvterm_id) {
+      continue;
+    }
+    // build the expression_cvterm variable by using the chado_generate_var() function
+    $values = array('expression_cvterm_id' => $expression_cvterm_id);
+    $expression_cvterm = chado_generate_var('expression_cvterm', $values);
+    // for fields in the table that are of type 'text' you may want to include
+    // those by default, the chado_generate_var does not include text fields as
+    // they may be very large and including a large text field can slow the page
+    // load.
+    // If you know a text field will never be large and it is important for the
+    // other functions that will see the node to have access to a field you can
+    // include it here using the chado_expand_var() function. In most
+    // cases it is probably best to let the end-user decide if text fields
+    // should be included by using this function in the templates.
+//    $expression_cvterm = chado_expand_var($expression_cvterm, 'field', 'expression_cvterm.description');
+    // add the new expression_cvterm object to this node.
+    $nodes[$nid]->expression_cvterm = $expression_cvterm;
+    // If your module is using the Chado Node: Title & Path API to allow custom
+    // titles for your node type. Every time you want the title of the node, you
+    // need to use the following API function:
+    $node->title = chado_get_node_title($node);
+  }
 }
