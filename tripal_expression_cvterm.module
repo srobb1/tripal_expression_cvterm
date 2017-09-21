@@ -436,7 +436,10 @@ print "I am here: chado_expression_cvterm_form\n";
  * @ingroup tripal_example
  */
 function chado_expression_cvterm_update($node) {
+  
 print "I am here:chado_expression_cvterm_update\n";
+
+/*
   // be sure to always trim text fields
   // use the chado_update_record() function to update the record
   $match = array(
@@ -452,10 +455,12 @@ print "I am here:chado_expression_cvterm_update\n";
     tripal_report_error('tripal_example', TRIPAL_WARNING, 'Update example: Unable to update example where values: %values',
       array('%values' => print_r($values, TRUE)));
   }
+  */
 }
 
 function chado_expression_cvterm_delete($node) {
 print "I am here: chado_expression_cvterm_delete\n";
+/*
   // get the expression_cvterm id from the node
   $expression_cvterm_id  = chado_get_id_from_nid('expression_cvterm', $node->nid);
   // if we don't have a expression_cvterm id for this node then this isn't a node of type
@@ -473,6 +478,7 @@ print "I am here: chado_expression_cvterm_delete\n";
   chado_query("DELETE FROM {expression_cvterm} WHERE expression_cvterm_id = :expression_cvterm_id", array(':expression_cvterm_id' => $expression_cvterm_id));
   // inform the user that the data was deleted
   drupal_set_message(t("The expression_cvterm and all associated data were removed from Chado"));
+*/
 }
 
 
@@ -491,6 +497,8 @@ print "I am here: chado_expression_cvterm_delete\n";
  */
 function tripal_expression_cvterm_node_access($node, $op, $account) {
 print "i am here tripal_expression_cvterm_node_access\n";
+
+/*
   $node_type = $node;
   if (is_object($node)) {
     $node_type = $node->type;
@@ -521,6 +529,8 @@ print "i am here tripal_expression_cvterm_node_access\n";
       }
     }
   }
+  */
+  
   return NODE_ACCESS_IGNORE;
 }
 
@@ -539,6 +549,7 @@ print "i am here tripal_expression_cvterm_node_access\n";
  */
 function chado_expression_cvterm_load($nodes) {
 print "I am here: chado_expression_cvterm_load\n";
+/*
   // EXPLANATION: when displaying or node or accessing the node in a template
   // we need the data from Chado. This function finds the record in Chado that
   // this node belongs to and adds the record.
@@ -572,57 +583,5 @@ print "I am here: chado_expression_cvterm_load\n";
     // need to use the following API function:
     $node->title = chado_get_node_title($node);
   }
-}
-
-
-/**
- * Implementation of hook_form_alter()
- *
- * Allows a module to alter any form prior to it being rendered. For more
- * details about Drupal's Form API see this page:
- *
- * https://api.drupal.org/api/drupal/includes!form.inc/group/form_api/7
- *
- */
-function tripal_expression_cvterm_form_alter(&$form, &$form_state, $form_id) {
-  print "I am here: tripal_expression_cvterm_form_alter\n";;
-  if ($form_id == "chado_expression_cvterm_node_form") {
-
-    // EXPLANATION:  The hook_form_alter() Drupal hook is used to alter a form
-    // before it is displayed. This allows any module to provide new form
-    // elements or change the form that another module creates. We do not need
-    // to alter a form created by another module, but we do want to alter the
-    // form for our new node type. For expression_cvterm, all node types will
-    // automatically have a 'Preview' button. For inserting or updating data
-    // for Chado we don't really need a Preview button and it complicates the
-    // form. So, we use the following code to disable the Preview button. If
-    // you want to keep the preview button then remove this code. turn of
-    // preview button for insert/updates
-    $form['actions']['preview']['#access'] = FALSE;
-
-    // EXPLANATION: Drupal always adds a 'body' field to all node types.
-    // Our node type doesn't use the 'body' field so we remove it from the form.
-    unset($form['body']);
-  }
-}
-
-/**
- * Implementation of hook_node_presave().
- *
- * Performs actions on a node object prior to it being saved
- *
- * @ingroup tripal_example
- */
-function tripal_expression_cvterm_node_presave($node) {
-print "I am here: tripal_expression_cvterm_node_presave\n";
-  // EXPLANATION: This node is useful for making changes to the node prior to it
-  // being saved to the database.
-  // One useful case for this is to set the title of a node using values
-  // supplied by the user.
-  //
-  // This function is not required. You probably won't need it if you don't
-  // define a custom node type in the hook_node_info() function. But it is node
-  // type agnostic, so you can use this function to change the contents of any
-  // node regardless of it's type.
-  // set the node title
+  */
 }
