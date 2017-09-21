@@ -538,7 +538,7 @@ print "i am here tripal_expression_cvterm_node_access\n";
  * @ingroup tripal_example
  */
 function chado_expression_cvterm_load($nodes) {
-print "i am here: chado_expression_cvterm_load\n";
+print "I am here: chado_expression_cvterm_load\n";
   // EXPLANATION: when displaying or node or accessing the node in a template
   // we need the data from Chado. This function finds the record in Chado that
   // this node belongs to and adds the record.
@@ -572,4 +572,57 @@ print "i am here: chado_expression_cvterm_load\n";
     // need to use the following API function:
     $node->title = chado_get_node_title($node);
   }
+}
+
+
+/**
+ * Implementation of hook_form_alter()
+ *
+ * Allows a module to alter any form prior to it being rendered. For more
+ * details about Drupal's Form API see this page:
+ *
+ * https://api.drupal.org/api/drupal/includes!form.inc/group/form_api/7
+ *
+ */
+function tripal_expression_cvterm_form_alter(&$form, &$form_state, $form_id) {
+  print "I am here: tripal_expression_cvterm_form_alter\n";;
+  if ($form_id == "chado_expression_cvterm_node_form") {
+
+    // EXPLANATION:  The hook_form_alter() Drupal hook is used to alter a form
+    // before it is displayed. This allows any module to provide new form
+    // elements or change the form that another module creates. We do not need
+    // to alter a form created by another module, but we do want to alter the
+    // form for our new node type. For expression_cvterm, all node types will
+    // automatically have a 'Preview' button. For inserting or updating data
+    // for Chado we don't really need a Preview button and it complicates the
+    // form. So, we use the following code to disable the Preview button. If
+    // you want to keep the preview button then remove this code. turn of
+    // preview button for insert/updates
+    $form['actions']['preview']['#access'] = FALSE;
+
+    // EXPLANATION: Drupal always adds a 'body' field to all node types.
+    // Our node type doesn't use the 'body' field so we remove it from the form.
+    unset($form['body']);
+  }
+}
+
+/**
+ * Implementation of hook_node_presave().
+ *
+ * Performs actions on a node object prior to it being saved
+ *
+ * @ingroup tripal_example
+ */
+function tripal_expression_cvterm_node_presave($node) {
+print "I am here: tripal_expression_cvterm_node_presave\n";
+  // EXPLANATION: This node is useful for making changes to the node prior to it
+  // being saved to the database.
+  // One useful case for this is to set the title of a node using values
+  // supplied by the user.
+  //
+  // This function is not required. You probably won't need it if you don't
+  // define a custom node type in the hook_node_info() function. But it is node
+  // type agnostic, so you can use this function to change the contents of any
+  // node regardless of it's type.
+  // set the node title
 }
