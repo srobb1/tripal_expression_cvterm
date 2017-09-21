@@ -259,7 +259,9 @@ function chado_expression_cvterm_chado_node_sync_select_query($query) {
  * @ingroup tripal_example
  */
 function chado_expression_cvterm_insert($node) {
-print "I am here chado_expression_cvterm_insert\n";
+
+  drupal_set_message("I am here chado_expression_cvterm_insert", 'warning');
+  
   $expression_cvterm_id = '';
   // if there is an expression_cvterm_id in the $node object then this must be a sync so
   // we can skip adding the expression_cvterm as it is already there, although we do need
@@ -303,7 +305,9 @@ print "I am here chado_expression_cvterm_insert\n";
  * @ingroup tripal_example
  */
 function chado_expression_cvterm_validate($node, $form, &$form_state) {
-print "I am here: chado_expression_cvterm_validate\n";;
+
+  drupal_set_message("I am here: chado_expression_cvterm_validate", 'warning');
+  
   // We only want to validate when the node is saved.
   // Since this validate can be called on AJAX and Deletion of the node
   // we need to make this check to ensure queries are not executed
@@ -320,7 +324,9 @@ print "I am here: chado_expression_cvterm_validate\n";;
 
 
 function chado_expression_cvterm_form($node, &$form_state) {
-print "I am here: chado_expression_cvterm_form\n";
+
+  drupal_set_message("I am here: chado_expression_cvterm_form", 'warning');
+  
   // EXPLANATION: This function should construct a form array that is used by
   // Drupal to construct a form for inserting or editing our new node type.
   // See this page for information about the Form API:
@@ -437,7 +443,7 @@ print "I am here: chado_expression_cvterm_form\n";
  */
 function chado_expression_cvterm_update($node) {
   
-print "I am here:chado_expression_cvterm_update\n";
+  drupal_set_message("I am here:chado_expression_cvterm_update", 'warning');
 
 /*
   // be sure to always trim text fields
@@ -459,7 +465,8 @@ print "I am here:chado_expression_cvterm_update\n";
 }
 
 function chado_expression_cvterm_delete($node) {
-print "I am here: chado_expression_cvterm_delete\n";
+
+  drupal_set_message("I am here: chado_expression_cvterm_delete", 'warning');
 /*
   // get the expression_cvterm id from the node
   $expression_cvterm_id  = chado_get_id_from_nid('expression_cvterm', $node->nid);
@@ -496,7 +503,8 @@ print "I am here: chado_expression_cvterm_delete\n";
  * be implemented by other modules.
  */
 function tripal_expression_cvterm_node_access($node, $op, $account) {
-print "i am here tripal_expression_cvterm_node_access\n";
+
+  drupal_set_message("i am here tripal_expression_cvterm_node_access", 'warning');
 
 /*
   $node_type = $node;
@@ -548,7 +556,8 @@ print "i am here tripal_expression_cvterm_node_access\n";
  * @ingroup tripal_example
  */
 function chado_expression_cvterm_load($nodes) {
-print "I am here: chado_expression_cvterm_load\n";
+
+  drupal_set_message("I am here: chado_expression_cvterm_load", 'warning');
 /*
   // EXPLANATION: when displaying or node or accessing the node in a template
   // we need the data from Chado. This function finds the record in Chado that
