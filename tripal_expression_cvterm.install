@@ -21,11 +21,13 @@ function tripal_expression_cvterm_disable() {
   // following code.
 
   // Disable all default views provided by this module
+  /*
   require_once("tripal_expression_cvterm.views_default.inc");
   $views = tripal_expression_cvterm_views_default_views();
   foreach (array_keys($views) as $view_name) {
     tripal_disable_view($view_name,FALSE,array('suppress_error' => TRUE));
   }
+  */
 
 }
 
@@ -39,9 +41,9 @@ function tripal_expression_cvterm_disable() {
  * @ingroup tripal_expression_cvterm
  */
 function tripal_expression_cvterm_requirements($phase) {
-
-
   $requirements = array();
+  
+  /*
   if ($phase == 'install') {
     // EXPLANATION: It is essential that Chado be installed for almost all
     // Tripal modules. Therefore, the following code checks to ensure Chado is
@@ -57,6 +59,8 @@ function tripal_expression_cvterm_requirements($phase) {
       );
     }
   }
+  */
+  
   return $requirements;
 }
 
@@ -75,7 +79,6 @@ function tripal_expression_cvterm_install() {
 
   // add any materialized view
   tripal_expression_cvterm_add_mviews();
-
 
 }
 
@@ -162,55 +165,4 @@ function tripal_expression_cvterm_add_mviews() {
   // best to create a single function for each one and call each function here.
   // Otherwise this function can become quite long.
 
-}
-
-
-/**
- * This is the required update for tripal_expression_cvterm.
- */
-function tripal_expression_cvterm_update_7200() {
-  // EXPLANATION: as you create new releases of your module you may find that
-  // tables your module created, or data may need to be adjusted. This function
-  // allows you to do that. This function is executed using the
-  // http://[your site]/update.php  URL or using the drush command 'updatedb'.
-  // This function should be named according to the instructions provided here:
-  // https://api.drupal.org/api/drupal/modules%21system%21system.api.php/function/hook_update_N/7
-  //
-  // Make sure we have the full API loaded this will help during a
-  // site upgrade when the tripal_core module is disabled.
-  module_load_include('module', 'tripal_core', 'tripal_core');
-  tripal_core_import_api();
-
-  // it is good to wrap any database changes inside of a try catch block:
-  try {
-   // perform database changes
-  }
-  catch (\PDOException $e) {
-    $error = $e->getMessage();
-    throw new DrupalUpdateException('Could not apply updates: '. $error);
-  }
-}
-
-
-/**
- * Implementation of hook_update_dependencies().
- *
- * It specifies a list of other modules whose updates must be run prior to
- * this one.  It also ensures the the Tripal API is in scope for site
- * upgrades when tripal_core is disabled.
- */
-function tripal_expression_cvterm_update_dependencies() {
-
-  $dependencies = array();
-
-  // EXPLANATION: here we can specify which modules must be updated prior to
-  // applying the updates in this module. This is useful because it prevents
-  // updates from being executed out of order. The following example code shows
-  // that the 'tripal_expression_cvterm' module update number 7200 must be executed after
-  // the 'tripal_cv' module's 7200 update.
-  $dependencies['tripal_expression_cvterm'][7200] = array(
-    'tripal_cv' => 7200
-  );
-
-  return $dependencies;
 }
