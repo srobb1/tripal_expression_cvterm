@@ -128,6 +128,11 @@ function tripal_expression_cvterm_schema() {
         'not null' => TRUE,
         'default' => 0
        ),
+      'expression_cvterm_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0
+      ),
       'cvterm_id' => array(
         'type' => 'int',
         'not null' => TRUE,
@@ -146,6 +151,7 @@ function tripal_expression_cvterm_schema() {
     ),
     'indexes' => array(
       'chado_expression_cvterm_idx1' => array('cvterm_id' , 'organism_id')
+      'chado_expression_cvterm_idx1' => array('expression_cvterm_id')
     ),
     'unique keys' => array(
       'chado_expression_cvterm_uq1' => array('nid', 'vid'),
