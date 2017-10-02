@@ -150,12 +150,12 @@ function tripal_expression_cvterm_schema() {
       ),
     ),
     'indexes' => array(
-      'chado_expression_cvterm_idx1' => array('cvterm_id' , 'organism_id')
+      'chado_expression_cvterm_idx1' => array('cvterm_id' , 'organism_id'),
       'chado_expression_cvterm_idx1' => array('expression_cvterm_id')
     ),
     'unique keys' => array(
       'chado_expression_cvterm_uq1' => array('nid', 'vid'),
-      'chado_expression_cvterm_uq2' => array('vid')
+      'chado_expression_cvterm_uq2' => array('vid'),
       'chado_expression_cvterm_uq3' => array('cvterm_id', 'organism_id'),
     ),
     'primary key' => array('nid'),

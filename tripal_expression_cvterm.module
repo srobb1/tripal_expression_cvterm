@@ -75,9 +75,9 @@ function tripal_expression_cvterm_menu() {
  function tripal_expression_cvterm_node_info() {
    return array(
      'chado_expression_cvterm' => array(
-       'name' => t('example'),
+       'name' => t('Chado Expression CVterm'),
        'base' => 'chado_expression_cvterm',
-       'description' => t('A Chado expression cvterm is a cvterm that has been associated with a expression image and feature.'),
+       'description' => t('A content type for displaying CVterms that have been associated with a feature and expression images'),
        'has_title' => TRUE,
        'locked' => TRUE,
 
@@ -90,8 +90,8 @@ function tripal_expression_cvterm_menu() {
                                                // if 'linking_table' is not specified
                                                // it defaults to the node_type name.
          'record_type_title' => array(
-           'singular' => t('Cvterm'),         // Singular human-readable title
-           'plural' => t('Cvterms')           // Plural human-readable title
+           'singular' => t('CVterm'),         // Singular human-readable title
+           'plural' => t('CVterms')           // Plural human-readable title
          ),
          'sync_filters' => array( // filters for syncing
            'type_id'     => TRUE,     // TRUE if there is an example.type_id field
@@ -192,6 +192,16 @@ function chado_expression_cvterm_chado_node_sync_create_new_node($new_node, $rec
   // data will be added via nodetype_load when the node is later used
   $new_node->title = "$record->genus $record->species ($record->common_name): $record->cvtname";
   $new_node->description = $record->definition;
+  $new_node->cvterm_id = $record->cvterm_id;
+  $new_node->organism_id = $record->organism_id;
+  /*
+  // Add url alias, test later
+  $url_name = $record->cvtname;
+  $url_name = str_replace('/\s+/' , $url_name);
+  $url_name = strtolower($url_name);
+  $alias = $record->genus . '/' . $record->species . '/' . $url_name;
+  $new_node->path['alias'] = $alias;
+  */
   $new_node->cv_id = $record->cvterm_type_id;
 
   return $new_node;
@@ -199,6 +209,14 @@ function chado_expression_cvterm_chado_node_sync_create_new_node($new_node, $rec
 function chado_expression_cvterm_chado_node_sync_select_query($query) {
   // You can add fields to be selected. Be sure to prefix each field with the
   // tale name.
+  $query['select']=array();
+  $query['select'][] = 'DISTINCT organism.organism_id';
+  $query['select'][] = 'organism.genus';
+  $query['select'][] = 'organism.species';
+  $query['select'][] = 'cv.cv_id';
+  $query['select'][] = 'cv.name as cvname';
+  $query['select'][] = 'cvterm.cvterm_id';
+  $query['select'][] = 'cvterm.name as cvtname';
   $query['select'][] = 'cvterm.definition';
 
 
@@ -207,6 +225,7 @@ function chado_expression_cvterm_chado_node_sync_select_query($query) {
   $query['joins'] = array();
 
     $query['joins'][] = 'INNER JOIN {feature_expression} feature_expression ON expression_cvterm.expression_id = feature_expression.expression_id'; 
+    $query['joins'][] = 'INNER JOIN {cv} cv ON expression_cvterm.cvterm_type_id = cv.cv_id';
     $query['joins'][] = 'INNER JOIN {cvterm} cvterm ON expression_cvterm.cvterm_id = cvterm.cvterm_id';
     $query['joins'][] = 'INNER JOIN {feature} feature ON feature.feature_id = feature_expression.feature_id'; 
     $query['joins'][] = 'INNER JOIN {organism} organism ON feature.organism_id = organism.organism_id';
@@ -236,6 +255,7 @@ function chado_expression_cvterm_chado_node_sync_select_query($query) {
   }
 
   // add more where_clauses
+   $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_id <> CT.cvterm_id';
    $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_type_id = :cv_id';
  
   // Must return the updated query
@@ -263,6 +283,8 @@ function chado_expression_cvterm_insert($node) {
   drupal_set_message("I am here chado_expression_cvterm_insert", 'warning');
   
   $expression_cvterm_id = '';
+  $cvterm_id = '';
+  $organism_id = '';
   // if there is an expression_cvterm_id in the $node object then this must be a sync so
   // we can skip adding the expression_cvterm as it is already there, although we do need
   // to proceed with insertion into the chado/drupal linking table.
@@ -271,6 +293,8 @@ function chado_expression_cvterm_insert($node) {
   }
   else {
     $expression_cvterm_id = $node-> expression_cvterm_id;
+    $organism_id = $node-> organism_id;
+    $cvterm_id = $node-> cvterm_id;
   }
 
   // Make sure the entry for this expression_cvterm doesn't already exist in the
@@ -281,8 +305,10 @@ function chado_expression_cvterm_insert($node) {
     $record = new stdClass();
     $record->nid = $node->nid;
     $record->vid = $node->vid;
-    $record-> expression_cvterm_id = $expression_cvterm_id;
-    drupal_write_record('chado_ expression_cvterm', $record);
+    $record->cvterm_id = $cvterm_id;
+    $record->organism_id = $organism_id;
+    $record->expression_cvterm_id = $expression_cvterm_id;
+    drupal_write_record('chado_expression_cvterm', $record);
   }
 }
 
