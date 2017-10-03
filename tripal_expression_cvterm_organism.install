@@ -80,7 +80,7 @@ function tripal_expression_cvterm_organism_install() {
   // To keep this module code short, create functions to do each of those tasks
 
   // add any materialized view
-  tripal_expression_cvterm_add_mviews();
+  tripal_expression_cvterm_organism_add_mviews();
 
 }
 
@@ -244,7 +244,7 @@ function tripal_expression_cvterm_organism_add_expression_cvterm_organism_table(
     // a foreign key relationships with this table. This information is required
     // for the Tripal API to be able to expand tables in templates.
   );
-  chado_create_custom_table('example', $schema, TRUE);
+  chado_create_custom_table('expression_cvterm_organism', $schema, TRUE);
 }
 
 /**
