@@ -495,7 +495,7 @@ function chado_expression_cvterm_organism_delete($node) {
   drupal_set_message("I am here: chado_expression_cvterm_delete", 'warning');
 /*
   // get the expression_cvterm id from the node
-  $expression_cvterm_id  = chado_get_id_from_nid('expression_cvterm', $node->nid);
+  $expression_cvterm_organism_id  = chado_get_id_from_nid('expression_cvterm_organism', $node->nid);
   // if we don't have a expression_cvterm id for this node then this isn't a node of type
   // chado_expression_cvterm or the entry in the chado_expression_cvterm table was lost.
   if (!$expression_cvterm_organism_id) {
