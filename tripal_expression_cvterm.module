@@ -41,7 +41,7 @@ function tripal_expression_cvterm_menu() {
   $module_name = 'tripal_expression_cvterm';
 
   // the base specified in hook_node_info
-  $node_type = 'chado_expression_cvterm';
+  $node_type = 'chado_expression_cvterm_organism';
 
   $items['admin/tripal/extension/tripal_expression_cvterm'] = array(
     'title' => 'tripal_expression_cvterm',
@@ -76,16 +76,16 @@ function tripal_expression_cvterm_menu() {
    return array(
      'chado_expression_cvterm' => array(
        'name' => t('Chado Expression CVterm'),
-       'base' => 'chado_expression_cvterm',
+       'base' => 'chado_expression_cvterm_organism',
        'description' => t('A content type for displaying CVterms that have been associated with a feature and expression images'),
        'has_title' => TRUE,
        'locked' => TRUE,
 
        // this is what differs from the regular Drupal-documented hook_node_info()
        'chado_node_api' => array(
-         'base_table' => 'expression_cvterm',            // The name of the chado base table
-         'hook_prefix' => 'chado_expression_cvterm',     // Usually the name of the node type
-         'linking_table' => 'chado_expression_cvterm',   // Specifies the linking table used
+         'base_table' => 'expression_cvterm_organism',            // The name of the chado base table
+         'hook_prefix' => 'chado_expression_cvterm_organism',     // Usually the name of the node type
+         'linking_table' => 'chado_expression_cvterm_organism',   // Specifies the linking table used
                                                // to map records to Drupal nodes.
                                                // if 'linking_table' is not specified
                                                // it defaults to the node_type name.
@@ -96,12 +96,6 @@ function tripal_expression_cvterm_menu() {
          'sync_filters' => array( // filters for syncing
            'type_id'     => TRUE,     // TRUE if there is an example.type_id field
            'organism_id' => TRUE,     // TRUE if there is an example.organism_id field
-           //'checkboxes'  => array('name')  // If the 'checkboxes' key is present then the
-                                           // value must be an array of column names in
-                                           // base table. The values from these columns will
-                                           // be retreived, contentated with a space delimeter
-                                           // and provided in a list of checkboxes
-                                           // for the user to choose which to sync.
          ),
        )
      ),
@@ -229,7 +223,8 @@ function chado_expression_cvterm_chado_node_sync_select_query($query) {
     $query['joins'][] = 'INNER JOIN {cvterm} cvterm ON expression_cvterm.cvterm_id = cvterm.cvterm_id';
     $query['joins'][] = 'INNER JOIN {feature} feature ON feature.feature_id = feature_expression.feature_id'; 
     $query['joins'][] = 'INNER JOIN {organism} organism ON feature.organism_id = organism.organism_id';
-  // base table: expression_cvterm already included
+    $query['joins'][] = 'INNER JOIN {expression_cvterm} expression_cvterm ON expression_cvterm.cvterm_id = expression_cvterm_organism.cvterm_id';
+  // base table: expression_cvterm_organism already included
 
   $category = 'tripal_expression_cvterm';
 
@@ -255,8 +250,11 @@ function chado_expression_cvterm_chado_node_sync_select_query($query) {
   }
 
   // add more where_clauses
-   $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_id <> CT.cvterm_id';
-   $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_type_id = :cv_id';
+//   $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_id <> CT.cvterm_id';
+     $query['where_clauses'][$category][] = 'expression_cvterm_organism.cvterm_id = expression_cvterm.cvterm_id';
+     $query['where_clauses'][$category][] = 'expression_cvterm_organism.cv_id = expression_cvterm.type_id';
+     $query['where_clauses'][$category][] = 'expression_cvterm_organism.organsim_id = organism.organism_id';
+     $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_type_id = :cv_id';
  
   // Must return the updated query
   return $query;
@@ -300,15 +298,15 @@ function chado_expression_cvterm_insert($node) {
   // Make sure the entry for this expression_cvterm doesn't already exist in the
   // chado_ expression_cvterm table if it doesn't exist then we want to add it.
   // This is also how the linking record gets added during a sync.
-  $check_org_id = chado_get_id_from_nid('expression_cvterm', $node->nid);
+  $check_org_id = chado_get_id_from_nid('expression_cvtermi_organism', $node->nid);
   if (!$check_org_id) {
     $record = new stdClass();
     $record->nid = $node->nid;
     $record->vid = $node->vid;
     $record->cvterm_id = $cvterm_id;
     $record->organism_id = $organism_id;
-    $record->expression_cvterm_id = $expression_cvterm_id;
-    drupal_write_record('chado_expression_cvterm', $record);
+    $record->expression_cvterm_organism_id = $expression_cvterm_organism_id;
+    drupal_write_record('chado_expression_cvterm_organism', $record);
   }
 }
 
@@ -343,7 +341,7 @@ function chado_expression_cvterm_validate($node, $form, &$form_state) {
   }
   // we are syncing if we do not have a node ID but we do have a example_id. We
   // don't need to validate during syncing so just skip it.
-  if (!property_exists($node, 'nid') and property_exists($node, 'expression_cvterm_id') and $node->expression_cvterm_id != 0) {
+  if (!property_exists($node, 'nid') and property_exists($node, 'expression_cvterm_organism_id') and $node->expression_cvterm_organism_id != 0) {
     return;
   }
 }
@@ -380,61 +378,61 @@ function chado_expression_cvterm_form($node, &$form_state) {
   // SET FORM DEFAULTS
   //---------------------------------------------
   // initialize the defaults for the form fields
-  $expression_id   = '';
+  $expression_cvterm_organism_id   = '';
   $cvterm_id = '';
   $cvterm_type_id  = '';
 
   // if we are editing an existing node then the 'example' record from Chado
   // is already part of the node, so we set the defaults from that object
- if (property_exists($node, 'expression_cvterm')) {
-    $expression_cvterm = $node->expression_cvterm;
-    $expression_cvterm_id   = $expression_cvterm->expression_cvterm_id;
-    $expression_id   = $expression_cvterm->expression_id;
-    $cvterm_id  = $expression_cvterm->cvterm_id;
-    $cvterm_type_id  = $expression_cvterm->cvterm_type_id;
+ if (property_exists($node, 'expression_cvterm_organism')) {
+    $expression_cvterm_organism = $node->expression_cvterm_organism;
+    $expression_cvterm_id   = $expression_cvterm_organism->expression_cvterm_id;
+    $organism_id   = $expression_cvterm_organism->organism_id;
+    $cvterm_id  = $expression_cvterm_organism->cvterm_id;
+    $cvterm_type_id  = $expression_cvterm_organism->cvterm_type_id;
     // keep track of the expression_cvterm id
-    $form['expression_cvterm_id'] = array(
+    $form['expression_cvterm_organism_id'] = array(
       '#type' => 'value',
-      '#value' => $expression_cvterm_id,
+      '#value' => $expression_cvterm_organism_id,
     );
   }
 
   // if we are re constructing the form from a failed validation or ajax
   // callback then use the $form_state['values'] values
   if (array_key_exists('values', $form_state)) {
-     $expression_cvterm_id   = $form_state['values']['expression_cvterm_id'];
-     $expression_id = $form_state['values']['expression_id'];
+     $expression_cvterm_organism_id   = $form_state['values']['expression_cvterm_organism_id'];
+     $organism_id = $form_state['values']['organism_id'];
      $cvterm_id  = $form_state['values']['cvterm_id'];
      $cvterm_type_id  = $form_state['values']['cvterm_type_id'];
   }
   // if we are re building the form from after submission (from ajax call) then
   // the values are in the $form_state['input'] array
   if (array_key_exists('input', $form_state) and !empty($form_state['input'])) {
-     $expression_cvterm_id   = $form_state['input']['expression_cvterm_id'];
-     $expression_id = $form_state['input']['expression_id'];
+     $expression_cvterm_organism_id   = $form_state['input']['expression_cvterm_organism_id'];
+     $organism_id = $form_state['input']['organism_id'];
      $cvterm_id  = $form_state['input']['cvterm_id'];
-     $cvterm_type_id  = $form_state['input']['cvterm__type_id'];
+     $cvterm_type_id  = $form_state['input']['cvterm_type_id'];
   }
 
 
   // FORM ELEMENTS
   //---------------------------------------------
-  $form['expression_cvterm_id'] = array(
+  $form['expression_cvterm_organism_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Expression CVterm ID'),
     '#required' => TRUE,
-    '#default_value' => $expression_cvterm_id,
+    '#default_value' => $expression_cvterm_organism_id,
     '#description' => t('Enter the expression cvterm id for this expression_cvterm. This name must be unique.'),
     '#maxlength' => 255
   );
   // for the type_id we want to use the default vocabulary so that this field
   // can have auto-complete functionality
-  $form['expression_id'] = array(
-    '#title'       => t('Expression ID'),
+  $form['organism_id'] = array(
+    '#title'       => t('Organism ID'),
     '#type'        => 'textfield',
-    '#description' => t("Choose the expression_id "),
+    '#description' => t("Choose the organism_id "),
     '#required'    => TRUE,
-    '#default_value' => $expression_id,
+    '#default_value' => $organism_id,
   );
   // add a select box of organisms
   $organisms = tripal_get_organism_select_options();
@@ -475,13 +473,13 @@ function chado_expression_cvterm_update($node) {
   // be sure to always trim text fields
   // use the chado_update_record() function to update the record
   $match = array(
-    'expression_cvterm_id' => $expression_cvterm_id,
+    'expression_cvterm_organism_id' => $expression_cvterm_organism_id,
   );
   $values = array(
 //    'uniquename' => $node->uniquename,
   );
   $options = array('return_record' => TRUE);
-  $status = chado_update_record('expression_cvterm', $match, $values, $options);
+  $status = chado_update_record('expression_cvterm_organism', $match, $values, $options);
   if (!$status) {
     drupal_set_message(t('Unable to update example.'), 'warning');
     tripal_report_error('tripal_example', TRIPAL_WARNING, 'Update example: Unable to update example where values: %values',
@@ -498,19 +496,19 @@ function chado_expression_cvterm_delete($node) {
   $expression_cvterm_id  = chado_get_id_from_nid('expression_cvterm', $node->nid);
   // if we don't have a expression_cvterm id for this node then this isn't a node of type
   // chado_expression_cvterm or the entry in the chado_expression_cvterm table was lost.
-  if (!$expression_cvterm_id) {
+  if (!$expression_cvterm_organism_id) {
     return;
   }
   // remove the entry in the chado_exapmle table linking the deleted
   // Drupal node with the data in Chado
-  $sql_del = "DELETE FROM {chado_expression_cvterm} WHERE nid = :nid AND vid = :vid";
+  $sql_del = "DELETE FROM {chado_expression_cvterm_organism} WHERE nid = :nid AND vid = :vid";
   db_query($sql_del, array(':nid' => $node->nid, ':vid' => $node->vid));
   // Remove data from expression_cvterm tables of Chado database. This will
   // cause a cascade delete and remove all data in referencing tables
-  // for this expression_cvterm
-  chado_query("DELETE FROM {expression_cvterm} WHERE expression_cvterm_id = :expression_cvterm_id", array(':expression_cvterm_id' => $expression_cvterm_id));
+  // for this expression_cvterm_organism
+  chado_query("DELETE FROM {expression_cvterm_organism} WHERE expression_cvterm_organism_id = :expression_cvterm_organism_id", array(':expression_cvterm_organism_id' => $expression_cvterm_organism_id));
   // inform the user that the data was deleted
-  drupal_set_message(t("The expression_cvterm and all associated data were removed from Chado"));
+  drupal_set_message(t("The expression_cvterm_organism and all associated data were removed from Chado"));
 */
 }
 
@@ -540,25 +538,25 @@ function tripal_expression_cvterm_node_access($node, $op, $account) {
   // EXPLANATION:  in the tripal_expression_cvterm_permissions() function we created the
   // permission types that are used here to check for access permissions to the
   // 'chado_exmaple' node type.
-  if($node_type == 'chado_expression_cvterm') {
+  if($node_type == 'chado_expression_cvterm_organism') {
     if ($op == 'create') {
-      if (!user_access('create chado_expression_cvterm content', $account)) {
+      if (!user_access('create chado_expression_cvterm_organism content', $account)) {
         return NODE_ACCESS_DENY;
       }
       return NODE_ACCESS_ALLOW;
     }
     if ($op == 'update') {
-      if (!user_access('edit chado_expression_cvterm content', $account)) {
+      if (!user_access('edit chado_expression_cvterm_organism content', $account)) {
         return NODE_ACCESS_DENY;
       }
     }
     if ($op == 'delete') {
-      if (!user_access('delete chado_expression_cvterm content', $account)) {
+      if (!user_access('delete chado_expression_cvterm_organism content', $account)) {
         return NODE_ACCESS_DENY;
       }
     }
     if ($op == 'view') {
-      if (!user_access('access chado_expression_cvterm content', $account)) {
+      if (!user_access('access chado_expression_cvterm_organism content', $account)) {
         return NODE_ACCESS_DENY;
       }
     }
@@ -591,16 +589,16 @@ function chado_expression_cvterm_load($nodes) {
   // there may be multiple nodes that get passed in so we have to iterate
   // through them all
   foreach ($nodes as $nid => $node) {
-    // find the expression_cvterm and add in the details
-    $expression_cvterm_id = chado_get_id_from_nid('expression_cvterm', $nid);
+    // find the expression_cvterm_organism and add in the details
+    $expression_cvterm_organism_id = chado_get_id_from_nid('expression_cvterm_organism', $nid);
     // if the nid does not have a matching record then skip this node.
     // this can happen with orphaned nodes.
-    if (!$expression_cvterm_id) {
+    if (!$expression_cvterm_organism_id) {
       continue;
     }
-    // build the expression_cvterm variable by using the chado_generate_var() function
-    $values = array('expression_cvterm_id' => $expression_cvterm_id);
-    $expression_cvterm = chado_generate_var('expression_cvterm', $values);
+    // build the expression_cvterm_organism variable by using the chado_generate_var() function
+    $values = array('expression_cvterm_organism_id' => $expression_cvterm_organism_id);
+    $expression_cvterm_organism = chado_generate_var('expression_cvterm_organism', $values);
     // for fields in the table that are of type 'text' you may want to include
     // those by default, the chado_generate_var does not include text fields as
     // they may be very large and including a large text field can slow the page
@@ -610,9 +608,9 @@ function chado_expression_cvterm_load($nodes) {
     // include it here using the chado_expand_var() function. In most
     // cases it is probably best to let the end-user decide if text fields
     // should be included by using this function in the templates.
-//    $expression_cvterm = chado_expand_var($expression_cvterm, 'field', 'expression_cvterm.description');
-    // add the new expression_cvterm object to this node.
-    $nodes[$nid]->expression_cvterm = $expression_cvterm;
+//    $expression_cvterm_organism = chado_expand_var($expression_cvterm_organism, 'field', 'expression_cvterm_organism.description');
+    // add the new expression_cvterm_organism object to this node.
+    $nodes[$nid]->expression_cvterm_organism = $expression_cvterm_organism;
     // If your module is using the Chado Node: Title & Path API to allow custom
     // titles for your node type. Every time you want the title of the node, you
     // need to use the following API function:

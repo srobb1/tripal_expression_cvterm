@@ -116,7 +116,7 @@ function tripal_expression_cvterm_schema() {
   // link the 'chado_example' node type (created by this example module) with a
   // record in the fake Chado example table. This table will link the 'nid' of
   // the node with the 'example_id' of the example record.
-  $schema['chado_expression_cvterm'] = array(
+  $schema['chado_expression_cvterm_organism'] = array(
     'fields' => array(
       'vid' => array(
         'type' => 'int',
@@ -130,17 +130,7 @@ function tripal_expression_cvterm_schema() {
         'not null' => TRUE,
         'default' => 0
        ),
-      'expression_cvterm_id' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0
-      ),
-      'cvterm_id' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0
-      ),
-      'organism_id' => array(
+      'expression_cvterm_organism_id' => array(
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0
@@ -152,19 +142,110 @@ function tripal_expression_cvterm_schema() {
       ),
     ),
     'indexes' => array(
-      'chado_expression_cvterm_idx1' => array('cvterm_id' , 'organism_id'),
-      'chado_expression_cvterm_idx1' => array('expression_cvterm_id')
+      'chado_expression_cvterm_idx1' => array('expression_cvterm_organism_id')
     ),
     'unique keys' => array(
       'chado_expression_cvterm_uq1' => array('nid', 'vid'),
       'chado_expression_cvterm_uq2' => array('vid'),
-      'chado_expression_cvterm_uq3' => array('cvterm_id', 'organism_id'),
     ),
     'primary key' => array('nid'),
   );
 
   return $schema;
 };
+
+
+/**
+ * Add custom tables to Chado that are required by this module
+ *
+ * @ingroup tripal_example
+ */
+function tripal_example_add_custom_tables() {
+
+  // EXPLANATION: for this example module we will create a set of example tables
+  // that mimic Chado tables. These tables are:
+  //
+  //   1) example     (for storing the primary example records)
+  //   2) exampleprop (for sorting properties about the example)
+  //   3) example_relationship (for storing relationships about examples)
+  //   4) example_dbxref (for storing cross-references about an example)
+  //
+  // To make the code easier to read, each table is created by a separate
+  // function called here:
+
+  tripal_expression_cvterm_add_expression_cvterm_organism_table();
+}
+
+
+/**
+ * Adds the 'example' custom table to Chado.
+ *
+ * @ingroup tripal_example
+ */
+function tripal_expression_cvterm_add_expression_cvterm_organism_table() {
+  // EXPLANATION: use the Drupal Schema API to describe the custom table. Then
+  // add the table using the chado_create_custom_table() function.
+  $schema = array(
+    'table' => 'expression_cvterm_organism',
+    'fields' => array(
+      'expression_cvterm_organism_id' => array(
+        'type' => 'serial',
+        'not null' => true,
+      ),
+      'cvterm_id' => array(
+        'type' => 'int',
+        'not null' => true,
+      ),
+      'organism_id' => array(
+        'type' => 'int',
+        'not null' => true,
+      ),
+      'cv_id' => array(
+        'type' => 'int',
+        'not null' => true,
+      ),
+    ),
+    'primary key' => array(
+      0 => 'expression_cvterm_organism_id',
+    ),
+    'unique keys' => array(
+      'expression_cvterm_organism_uq1' => array(
+        0 => 'cv_id',
+        1 => 'cvterm_id',
+        2 => 'organism_id',
+      ),
+    ),
+    'indexes' => array(
+      'expression_cvterm_organism_idx1' => array(
+        0 => 'expression_cvterm_organism_id',
+      ),
+    ),
+    'foreign keys' => array(
+      'cvterm' => array(
+        'table' => 'cvterm',
+        'columns' => array(
+          'cvterm_id' => 'cvterm_id',
+        ),
+      ),
+      'organism' => array(
+        'table' => 'organism',
+        'columns' => array(
+          'organism_id' => 'organism_id',
+        ),
+      ),
+      'cv' => array(
+        'table' => 'cv',
+        'columns' => array(
+          'cv_id' => 'cv_id',
+        ),
+      ),
+    ),
+    // EXPLANATION: the 'referring_tables' array is the list of tables that have
+    // a foreign key relationships with this table. This information is required
+    // for the Tripal API to be able to expand tables in templates.
+  );
+  chado_create_custom_table('example', $schema, TRUE);
+}
 
 /**
  * Creates a materialized view that stores the type & number of examples per
