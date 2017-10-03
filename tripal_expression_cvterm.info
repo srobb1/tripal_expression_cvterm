@@ -1,4 +1,4 @@
-name = Tripal Expression Cvterms  
+name = Tripal Expression Cvterm Organism  
 description = Syncs Cvterms that are associated with Expression Images And Features
 core = 7.x
 package = Tripal Extensions
