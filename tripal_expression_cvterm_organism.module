@@ -43,7 +43,7 @@ function tripal_expression_cvterm_organism_menu() {
   // the base specified in hook_node_info
   $node_type = 'chado_expression_cvterm_organism';
 
-  $items['admin/tripal/extension/tripal_expression_cvterm_organsim'] = array(
+  $items['admin/tripal/extension/tripal_expression_cvterm_organism'] = array(
     'title' => 'tripal_expression_cvterm_organism',
     'description' => 'Example module for help with development of new extension modules.',
     'page callback' => 'tripal_expression_cvterm_organism_admin_examples_listing',
