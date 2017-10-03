@@ -13,7 +13,7 @@
  *
  * @ingroup tripal_expression_cvterm
  */
-function tripal_expression_cvterm_disable() {
+function tripal_expression_cvterm_organism_disable() {
 
   // EXPLANATION: If you are using Drupal Views you want to ensure that any
   // default views that your module provides are disabled when the module is
@@ -42,7 +42,7 @@ function tripal_expression_cvterm_disable() {
  *
  * @ingroup tripal_expression_cvterm
  */
-function tripal_expression_cvterm_requirements($phase) {
+function tripal_expression_cvterm_organism_requirements($phase) {
   $requirements = array();
   
   /*
@@ -73,7 +73,7 @@ function tripal_expression_cvterm_requirements($phase) {
  *
  * @ingroup tripal_expression_cvterm
  */
-function tripal_expression_cvterm_install() {
+function tripal_expression_cvterm_organism_install() {
 
   // EXPLANATION: Here is a good place to add any materialized views, controlled
   // vocabularies CV, databases or CV terms needed by your module.
@@ -92,7 +92,7 @@ function tripal_expression_cvterm_install() {
  *
  * @ingroup tripal_expression_cvterm
  */
-function tripal_expression_cvterm_uninstall() {
+function tripal_expression_cvterm_organism_uninstall() {
 
 }
 
@@ -108,7 +108,7 @@ function tripal_expression_cvterm_uninstall() {
  *
  * @ingroup tripal_expression_cvterm
  */
-function tripal_expression_cvterm_schema() {
+function tripal_expression_cvterm_organism_schema() {
 
   // EXPLANATION: If your module creates a node type for data in the Chado
   // database then you probably need to link Drupal nodes with a respective ID
@@ -160,7 +160,7 @@ function tripal_expression_cvterm_schema() {
  *
  * @ingroup tripal_example
  */
-function tripal_example_add_custom_tables() {
+function tripal_expression_cvterm_organism_add_custom_tables() {
 
   // EXPLANATION: for this example module we will create a set of example tables
   // that mimic Chado tables. These tables are:
@@ -173,7 +173,7 @@ function tripal_example_add_custom_tables() {
   // To make the code easier to read, each table is created by a separate
   // function called here:
 
-  tripal_expression_cvterm_add_expression_cvterm_organism_table();
+  tripal_expression_cvterm_organism_add_expression_cvterm_organism_table();
 }
 
 
@@ -182,7 +182,7 @@ function tripal_example_add_custom_tables() {
  *
  * @ingroup tripal_example
  */
-function tripal_expression_cvterm_add_expression_cvterm_organism_table() {
+function tripal_expression_cvterm_organism_add_expression_cvterm_organism_table() {
   // EXPLANATION: use the Drupal Schema API to describe the custom table. Then
   // add the table using the chado_create_custom_table() function.
   $schema = array(
@@ -253,7 +253,7 @@ function tripal_expression_cvterm_add_expression_cvterm_organism_table() {
  *
  * @ingroup tripal_expression_cvterm
  */
-function tripal_expression_cvterm_add_mviews() {
+function tripal_expression_cvterm_organism_add_mviews() {
 
   // EXPLANATION: use the tripal_add_mview() function to add a materialized view
   // needed by your module. If you have more than one materialized view it is
