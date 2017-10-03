@@ -5,9 +5,9 @@ Columns:
 4. Publication Year
 5. Publication pages
 6. Publication citation
-7. 'Unpublished Works'
-8. 'Author'
-9. 'Citation'
+7. Must be either 'Unpublished Works' or 'Journal Article'
+8. Must be 'Author'
+9. Must be 'Citation'
 10. Publication Author name
 11. Expression Image file name (unique)
 12. Figure legend
