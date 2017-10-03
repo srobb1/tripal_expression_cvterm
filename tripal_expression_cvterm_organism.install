@@ -81,6 +81,7 @@ function tripal_expression_cvterm_organism_install() {
 
   // add any materialized view
   tripal_expression_cvterm_organism_add_mviews();
+  tripal_expression_cvterm_organism_add_custom_tables();
 
 }
 
