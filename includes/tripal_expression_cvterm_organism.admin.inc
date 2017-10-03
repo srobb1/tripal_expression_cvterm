@@ -5,7 +5,7 @@
  *
  */
 
-function tripal_expression_cvterm_admin_examples_listing() {
+function tripal_expression_cvterm_organism_admin_examples_listing() {
   $output = '';
 
   // set the breadcrumb
@@ -14,7 +14,7 @@ function tripal_expression_cvterm_admin_examples_listing() {
   $breadcrumb[] = l('Administration', 'admin');
   $breadcrumb[] = l('Tripal', 'admin/tripal');
   $breadcrumb[] = l('Chado', 'admin/tripal/chado');
-  $breadcrumb[] = l('Examples', 'admin/tripal/chado/tripal_expression_cvterm');
+  $breadcrumb[] = l('Examples', 'admin/tripal/chado/tripal_expression_cvterm_organism');
   drupal_set_breadcrumb($breadcrumb);
 
 
@@ -47,7 +47,7 @@ function tripal_expression_cvterm_admin_examples_listing() {
  *
  * @ingroup tripal_expression_cvterm
  */
-function tripal_expression_cvterm_admin() {
+function tripal_expression_cvterm_organism_admin() {
   $form = array();
 
   $form['nothing'] = array(
@@ -61,7 +61,7 @@ function tripal_expression_cvterm_admin() {
   // elements.
   $details = array(
       // the name of the MODULE implementing the content type
-    'module' => 'tripal_expression_cvterm',
+    'module' => 'tripal_expression_cvterm_organism',
     'content_type' => 'chado_example',
       // An array of options to use under "Page Titles"
       // the key should be the token and the value should be the human-readable
@@ -91,6 +91,6 @@ function tripal_expression_cvterm_admin() {
  *
  * @ingroup tripal_expression_cvterm
  */
-function tripal_expression_cvterm_admin_validate($form, &$form_state) {
+function tripal_expression_cvterm_organism_admin_validate($form, &$form_state) {
 
 }
