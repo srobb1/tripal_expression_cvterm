@@ -202,7 +202,7 @@ function chado_expression_cvterm_organism_chado_node_sync_create_new_node($new_n
 
   return $new_node;
 }
-function chado_expression_organism_cvterm_chado_node_sync_select_query($query) {
+function chado_expression_cvterm_organism_chado_node_sync_select_query($query) {
   // You can add fields to be selected. Be sure to prefix each field with the
   // tale name.
   $query['select']=array();
