@@ -1,0 +1,24 @@
+Columns:
+1. Publication Title
+2. Publication Volume
+3. Publication Series Name
+4. Publication Year
+5. Publication pages
+6. Publication citation
+7. 'Unpublished Works'
+8. 'Author'
+9. 'Citation'
+10. Publication Author name
+11. Expression Image file name (unique)
+12. Figure legend
+13. Feature.uniquename
+14. Image type (single or panel)
+
+new test3	55555	SIMR Notebook	2017	23-26	smr. Title3. Test. Vloume. Bla	Unpublished Works	Author	Citation	smr	test_file_name_11	fig legend	ENSAMXT00000017644	Single
+new test3	55555	SIMR Notebook	2017	23-26	smr. Title3. Test. Vloume. Bla	Unpublished Works	Author	Citation	smr	test_file_name_12	fig legend	ENSAMXT00000017644	Single
+new test3	55555	SIMR Notebook	2017	23-26	smr. Title3. Test. Vloume. Bla	Unpublished Works	Author	Citation	smr	test_file_name_13	fig legend	ENSAMXT00000017644	Single
+new test3	55555	SIMR Notebook	2017	23-26	smr. Title3. Test. Vloume. Bla	Unpublished Works	Author	Citation	smr	test_file_name_14	fig legend	ENSAMXT00000017644	Single
+new test3	55555	SIMR Notebook	2017	23-26	smr. Title3. Test. Vloume. Bla	Unpublished Works	Author	Citation	smr	test_file_name_15	fig legend	ENSAMXT00000017644	Single
+new test3	55555	SIMR Notebook	2017	23-26	smr. Title3. Test. Vloume. Bla	Unpublished Works	Author	Citation	smr	test_file_name_16	fig legend	ENSAMXT00000017644	Single
+new test3	55555	SIMR Notebook	2017	23-26	smr. Title3. Test. Vloume. Bla	Unpublished Works	Author	Citation	smr	test_file_name_17	fig legend	ENSAMXT00000017644	Single
+new test3	55555	SIMR Notebook	2017	23-26	smr. Title3. Test. Vloume. Bla	Unpublished Works	Author	Citation	smr	test_file_name_18	fig legend	ENSAMXT00000017644	Single
