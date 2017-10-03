@@ -219,13 +219,13 @@ function chado_expression_cvterm_organism_chado_node_sync_select_query($query) {
   // Provide any join you may need to the joins array. Be sure to wrap the
   // table name in curly brackets.
   $query['joins'] = array();
-
+    $query['joins'][] = 'INNER JOIN {expression_cvterm} expression_cvterm ON expression_cvterm.cvterm_id = expression_cvterm_organism.cvterm_id';
     $query['joins'][] = 'INNER JOIN {feature_expression} feature_expression ON expression_cvterm.expression_id = feature_expression.expression_id'; 
     $query['joins'][] = 'INNER JOIN {cv} cv ON expression_cvterm.cvterm_type_id = cv.cv_id';
     $query['joins'][] = 'INNER JOIN {cvterm} cvterm ON expression_cvterm.cvterm_id = cvterm.cvterm_id';
     $query['joins'][] = 'INNER JOIN {feature} feature ON feature.feature_id = feature_expression.feature_id'; 
     $query['joins'][] = 'INNER JOIN {organism} organism ON feature.organism_id = organism.organism_id';
-    $query['joins'][] = 'INNER JOIN {expression_cvterm} expression_cvterm ON expression_cvterm.cvterm_id = expression_cvterm_organism.cvterm_id';
+   
   // base table: expression_cvterm_organism already included
 
   $category = 'tripal_expression_cvterm_organism';
