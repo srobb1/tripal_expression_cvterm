@@ -1,0 +1,622 @@
+<?php
+// test
+function tripal_expression_cvterm_organism_permission() {
+
+  // EXPLANATION:  here we want to setup any of the permission types that this
+  // module needs. Our example module creates a new chado node type called
+  // 'chado_example'. Therefore, we need permissions to view, edit, delete,
+  // create our new node type. Additionally, we want to add a permission that
+  // allows for administration of this module. These permissions will appear in
+  // the 'People' -> 'Permissions' configuration page and allow the site admin
+  // to specify which user roles are allowed to perform specific actions.
+  return array(
+    'access chado_expression_cvterm_organism content' => array(
+      'title' => t('View Chado Expression Cvterm Organism'),
+      'description' => t('Allow users to view example pages.'),
+    ),
+    'create chado_expression_cvterm_organism content' => array(
+      'title' => t('Create Chado Expression Cvterm Organism'),
+      'description' => t('Allow users to create new example pages.'),
+    ),
+    'delete chado_expression_cvterm_organism content' => array(
+      'title' => t('Delete Chado Expression Cvterm Organism'),
+      'description' => t('Allow users to delete example pages.'),
+    ),
+    'edit chado_expression_cvterm_organism content' => array(
+      'title' => t('Edit Chado Expression Cvterm Organism'),
+      'description' => t('Allow users to edit example pages.'),
+    ),
+    'administer chado_expression_cvterm_organism module' => array(
+      'title' => t('Administer Chado Expression Cvterm Organism'),
+      'description' => t('Allow users to administer all examples.'),
+    ),
+  );
+}
+
+
+function tripal_expression_cvterm_organism_menu() {
+  $items = array();
+   
+  //  the machine name of your module
+  $module_name = 'tripal_expression_cvterm_organism';
+
+  // the base specified in hook_node_info
+  $node_type = 'chado_expression_cvterm_organism';
+
+  $items['admin/tripal/extension/tripal_expression_cvterm_organsim'] = array(
+    'title' => 'tripal_expression_cvterm_organism',
+    'description' => 'Example module for help with development of new extension modules.',
+    'page callback' => 'tripal_expression_cvterm_organism_admin_examples_listing',
+    'access arguments' => array('administer tripal example'),
+    'type' => MENU_NORMAL_ITEM,
+    // We include the file where the 'page callback' function
+    // is located.  This removes the need to include all of the
+    // include files at the top of the module, and speeds
+    // module loading time.
+    'file' => '/includes/tripal_expression_cvterm_organism.admin.inc',
+  );
+
+
+   // This menu item will be a tab on the admin/tripal/chado/tripal_example page
+   // that is not selected by default
+   $items['admin/tripal/extension/tripal_expression_cvterm_organism/sync'] = array(
+     'title' => ' Sync',
+     'description' => 'Sync Cvterms that are associated with Expression Images and Features from Chado with Drupal',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('chado_node_sync_form', $module_name, $node_type),
+     'access arguments' => array('administer tripal examples'),
+     'type' => MENU_LOCAL_TASK,
+     'weight' => 0
+   );
+
+   return $items;
+ }
+
+ function tripal_expression_cvterm_organism_node_info() {
+   return array(
+     'chado_expression_cvterm_organism' => array(
+       'name' => t('Chado Expression CVterm Organism'),
+       'base' => 'chado_expression_cvterm_organism',
+       'description' => t('A content type for displaying CVterms that have been associated with a feature and expression images'),
+       'has_title' => TRUE,
+       'locked' => TRUE,
+
+       // this is what differs from the regular Drupal-documented hook_node_info()
+       'chado_node_api' => array(
+         'base_table' => 'expression_cvterm_organism',            // The name of the chado base table
+         'hook_prefix' => 'chado_expression_cvterm_organism',     // Usually the name of the node type
+         'linking_table' => 'chado_expression_cvterm_organism',   // Specifies the linking table used
+                                               // to map records to Drupal nodes.
+                                               // if 'linking_table' is not specified
+                                               // it defaults to the node_type name.
+         'record_type_title' => array(
+           'singular' => t('CVterm'),         // Singular human-readable title
+           'plural' => t('CVterms')           // Plural human-readable title
+         ),
+         'sync_filters' => array( // filters for syncing
+           'type_id'     => TRUE,     // TRUE if there is an example.type_id field
+           'organism_id' => TRUE,     // TRUE if there is an example.organism_id field
+         ),
+       )
+     ),
+   );
+ }
+
+
+
+function chado_expression_cvterm_organism_chado_node_sync_form($form, &$form_state) {
+
+ if (isset($form_state['build_info']['args'][0])) {
+    $module = $form_state['build_info']['args'][0];
+    $node_type = $form_state['build_info']['args'][1];
+    $node_info = call_user_func($module . '_node_info');
+
+    // If a linking table is set in the node_info array then use that,
+    // otherwise ues the node_type as the linking table.
+    if (array_key_exists('linking_table', $node_info[$node_type]['chado_node_api'])) {
+      $linking_table = $node_info[$node_type]['chado_node_api']['linking_table'];
+    }
+    else {
+      $linking_table = 'chado_' . $node_info[$node_type]['chado_node_api']['base_table'];
+    }
+    $args = $node_info[$node_type]['chado_node_api'];
+    $form_state['chado_node_api'] = $args;
+  }
+
+
+  // get the list of CV Libraries
+  if ($args['sync_filters']['type_id']) {
+    $sql = "SELECT distinct cv.cv_id , cv.name
+         FROM {cv} cv , {expression_cvterm} ec , {cvterm} cvt
+         WHERE ec.cvterm_id = cvt.cvterm_id
+          AND cvt.cv_id = cv.cv_id
+          ORDER BY cv.name";
+    $results = chado_query($sql);
+    $libraries[] = '';
+    foreach ($results as $library) {
+      $libraries[$library->cv_id] = $library->name;
+    }
+    $form['sync']['type_ids'] = array(
+      '#title' => t('CV Library'),
+      '#type' => t('select'),
+      '#description' => t("Choose the CV Library for which %title_plural types set above will be synced.",
+      array(
+        '%title_singular' => $args['record_type_title']['singular'],
+        '%title_plural' => $args['record_type_title']['plural']
+      )),
+      '#options' => $libraries,
+      '#default_value' => (isset($form_state['values']['type_id'])) ? $form_state['values']['type_id'] : 0,
+    );
+  }
+  // get the list of CV Libraries
+
+
+  // get the list of organisms
+  if ($args['sync_filters']['organism_id']) {
+    $sql = "SELECT distinct o.organism_id, genus, species, common_name
+        FROM {feature_expression} fe , {feature} f , {organism} o
+        WHERE fe.feature_id = f.feature_id
+          AND f.organism_id = o.organism_id ORDER BY genus, species";
+    $results = chado_query($sql);
+    $organisms[] = '';
+    foreach ($results as $organism) {
+      $organisms[$organism->organism_id] = "$organism->genus $organism->species ($organism->common_name)";
+    }
+    $form['sync']['organism_id'] = array(
+      '#title' => t('Organism'),
+      '#type' => t('select'),
+      '#description' => t("Choose the organism for which %title_plural types set above will be synced.", 
+      array(
+        '%title_singular' => $args['record_type_title']['singular'],
+        '%title_plural' => $args['record_type_title']['plural']
+      )),
+      '#options' => $organisms,
+      '#default_value' => (isset($form_state['values']['organism_id'])) ? $form_state['values']['organism_id'] : 0,
+    );
+  }
+  // get the list of organisms
+
+  return $form;
+}
+function chado_expression_cvterm_organism_chado_node_sync_create_new_node($new_node, $record) {
+
+  // Add relevant chado details to the new node object. This really only
+  // needs to be the fields from the node used during node creation
+  // including values used to generate the title, etc. All additional chado
+  // data will be added via nodetype_load when the node is later used
+  $new_node->title = "$record->genus $record->species ($record->common_name): $record->cvtname";
+  $new_node->description = $record->definition;
+  $new_node->cvterm_id = $record->cvterm_id;
+  $new_node->organism_id = $record->organism_id;
+  $new_node->cv_id = $record->cvterm_type_id;
+  
+  /*
+  // Add url alias, test later
+  $url_name = $record->cvtname;
+  $url_name = str_replace('/\s+/' , $url_name);
+  $url_name = strtolower($url_name);
+  $alias = $record->genus . '/' . $record->species . '/' . $url_name;
+  $new_node->path['alias'] = $alias;
+  */
+
+
+  return $new_node;
+}
+function chado_expression_organism_cvterm_chado_node_sync_select_query($query) {
+  // You can add fields to be selected. Be sure to prefix each field with the
+  // tale name.
+  $query['select']=array();
+  $query['select'][] = 'DISTINCT organism.organism_id';
+  $query['select'][] = 'organism.genus';
+  $query['select'][] = 'organism.species';
+  $query['select'][] = 'cv.cv_id';
+  $query['select'][] = 'cv.name as cvname';
+  $query['select'][] = 'cvterm.cvterm_id';
+  $query['select'][] = 'cvterm.name as cvtname';
+  $query['select'][] = 'cvterm.definition';
+
+
+  // Provide any join you may need to the joins array. Be sure to wrap the
+  // table name in curly brackets.
+  $query['joins'] = array();
+
+    $query['joins'][] = 'INNER JOIN {feature_expression} feature_expression ON expression_cvterm.expression_id = feature_expression.expression_id'; 
+    $query['joins'][] = 'INNER JOIN {cv} cv ON expression_cvterm.cvterm_type_id = cv.cv_id';
+    $query['joins'][] = 'INNER JOIN {cvterm} cvterm ON expression_cvterm.cvterm_id = cvterm.cvterm_id';
+    $query['joins'][] = 'INNER JOIN {feature} feature ON feature.feature_id = feature_expression.feature_id'; 
+    $query['joins'][] = 'INNER JOIN {organism} organism ON feature.organism_id = organism.organism_id';
+    $query['joins'][] = 'INNER JOIN {expression_cvterm} expression_cvterm ON expression_cvterm.cvterm_id = expression_cvterm_organism.cvterm_id';
+  // base table: expression_cvterm_organism already included
+
+  $category = 'tripal_expression_cvterm_organism';
+
+
+  // where_args
+  // set original type values as a new category
+  // keep organism
+  // remove key 'type' and 'id'
+  foreach ($query['where_args']['type'] as $key => $value){
+    $query['where_args'][$category][':cv_id'] = $value;
+  }
+  // organism where_arg already included
+  unset($query['where_args']['type']);
+  if (array_key_exists('id' , $query['where_args'])){
+      unset($query['where_args']['id']);
+  }
+
+  // where clauses
+  // remove key 'type' and 'id'
+  unset($query['where_clauses']['type']);
+  if (array_key_exists('id' , $query['where_clauses'])){
+      unset($query['where_clauses']['id']);
+  }
+
+  // add more where_clauses
+//   $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_id <> CT.cvterm_id';
+     $query['where_clauses'][$category][] = 'expression_cvterm_organism.cvterm_id = expression_cvterm.cvterm_id';
+     $query['where_clauses'][$category][] = 'expression_cvterm_organism.cv_id = expression_cvterm.type_id';
+     $query['where_clauses'][$category][] = 'expression_cvterm_organism.organsim_id = organism.organism_id';
+     $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_type_id = :cv_id';
+ 
+  // Must return the updated query
+  return $query;
+}
+
+
+/**
+ *  Implementation of hook_insert(). This function is called after the node is
+ * inserted into the database. We need it so that we can insert appropriate
+ * fields as provided by the user into the database. And so that we can link the
+ * new Drupal node to the data in Chado via the chado_example linking table. We
+ * can get to this function also during "syncing".
+ * With syncing, however, the data already exists in Chado and we do not want
+ * to try to re-add it. But we do need to add an entry to the chado_example
+ * table to link the Drupal node with the data in the 'example' table of Chado.
+ *
+ *  This function is not required if the hook_node_info() does not define
+ *  any custom node types.
+ *
+ * @ingroup tripal_example
+ */
+function chado_expression_cvterm_organism_insert($node) {
+
+  drupal_set_message("I am here chado_expression_cvterm_insert", 'warning');
+  
+  $expression_cvterm_organism_id = '';
+  $cvterm_id = '';
+  $organism_id = '';
+  // if there is an expression_cvterm_id in the $node object then this must be a sync so
+  // we can skip adding the expression_cvterm as it is already there, although we do need
+  // to proceed with insertion into the chado/drupal linking table.
+  if (!property_exists($node, 'expression_cvterm_id')) {
+    // Add code later to create expression_cvterm based on form.
+  }
+  else {
+    $expression_cvterm_organismid = $node-> expression_cvterm_id;
+    $organism_id = $node-> organism_id;
+    $cvterm_id = $node-> cvterm_id;
+  }
+
+  // Make sure the entry for this expression_cvterm doesn't already exist in the
+  // chado_ expression_cvterm table if it doesn't exist then we want to add it.
+  // This is also how the linking record gets added during a sync.
+  $check_org_id = chado_get_id_from_nid('expression_cvtermi_organism', $node->nid);
+  if (!$check_org_id) {
+    $record = new stdClass();
+    $record->nid = $node->nid;
+    $record->vid = $node->vid;
+    $record->cvterm_id = $cvterm_id;
+    $record->organism_id = $organism_id;
+    $record->expression_cvterm_organism_id = $expression_cvterm_organism_id;
+    drupal_write_record('chado_expression_cvterm_organism', $record);
+  }
+}
+
+
+/**
+ * Implementation of hook_validate
+ *
+ * This function validates a form prior to insert or update. If an error is
+ * detected, it sets the error using form_set_error() which takes the user back
+ * to the form to make corrections.
+ *
+ * This validation is being used for three activities:
+ *   CASE A: Update a node that exists in both Drupal and Chado
+ *   CASE B: Synchronizing a node from Chado to Drupal
+ *   CASE C: Inserting a new node that exists in neither Drupal nor Chado
+ *
+ * @param $node
+ *
+ *
+ * @ingroup tripal_example
+ */
+function chado_expression_cvterm_organism_validate($node, $form, &$form_state) {
+
+  drupal_set_message("I am here: chado_expression_cvterm_validate", 'warning');
+  
+  // We only want to validate when the node is saved.
+  // Since this validate can be called on AJAX and Deletion of the node
+  // we need to make this check to ensure queries are not executed
+  // without the proper values.
+  if(property_exists($node, "op") and $node->op != 'Save') {
+    return;
+  }
+  // we are syncing if we do not have a node ID but we do have a example_id. We
+  // don't need to validate during syncing so just skip it.
+  if (!property_exists($node, 'nid') and property_exists($node, 'expression_cvterm_organism_id') and $node->expression_cvterm_organism_id != 0) {
+    return;
+  }
+}
+
+
+function chado_expression_cvterm_organism_form($node, &$form_state) {
+
+  drupal_set_message("I am here: chado_expression_cvterm_form", 'warning');
+  
+  // EXPLANATION: This function should construct a form array that is used by
+  // Drupal to construct a form for inserting or editing our new node type.
+  // See this page for information about the Form API:
+  // https://api.drupal.org/api/drupal/includes!form.inc/group/form_api/7
+  //
+  // The code below is laid out in the following order
+  // 1) Set default values
+  // 2) Add form elements used by this node type
+  // 3) Use the Tripal API to add form elements for properties,
+  //    dbxref's and relationships
+  //
+  // For the example code below we assume that the fake 'example' table only has
+  // a uniquename, organism_id, type_id and example_id.
+  $form = array();
+  // Default values can come in the following ways:
+  //
+  // 1) as elements of the $node object. This occurs when editing an existing
+  //    example
+  // 2) in the $form_state['values'] array which occurs on a failed validation
+  //    or ajax callbacks from non submit form elements
+  // 3) in the $form_state['input'[ array which occurs on ajax callbacks from
+  //    submit form elements and the form is being rebuilt
+  //
+  // set form field defaults
+  // SET FORM DEFAULTS
+  //---------------------------------------------
+  // initialize the defaults for the form fields
+  $expression_cvterm_organism_id   = '';
+  $cvterm_id = '';
+  $cvterm_type_id  = '';
+
+  // if we are editing an existing node then the 'example' record from Chado
+  // is already part of the node, so we set the defaults from that object
+ if (property_exists($node, 'expression_cvterm_organism')) {
+    $expression_cvterm_organism = $node->expression_cvterm_organism;
+    $expression_cvterm_organism_id   = $expression_cvterm_organism->expression_cvterm_organism_id;
+    $organism_id   = $expression_cvterm_organism->organism_id;
+    $cvterm_id  = $expression_cvterm_organism->cvterm_id;
+    $cvterm_type_id  = $expression_cvterm_organism->cvterm_type_id;
+    // keep track of the expression_cvterm id
+    $form['expression_cvterm_organism_id'] = array(
+      '#type' => 'value',
+      '#value' => $expression_cvterm_organism_id,
+    );
+  }
+
+  // if we are re constructing the form from a failed validation or ajax
+  // callback then use the $form_state['values'] values
+  if (array_key_exists('values', $form_state)) {
+     $expression_cvterm_organism_id   = $form_state['values']['expression_cvterm_organism_id'];
+     $organism_id = $form_state['values']['organism_id'];
+     $cvterm_id  = $form_state['values']['cvterm_id'];
+     $cvterm_type_id  = $form_state['values']['cvterm_type_id'];
+  }
+  // if we are re building the form from after submission (from ajax call) then
+  // the values are in the $form_state['input'] array
+  if (array_key_exists('input', $form_state) and !empty($form_state['input'])) {
+     $expression_cvterm_organism_id   = $form_state['input']['expression_cvterm_organism_id'];
+     $organism_id = $form_state['input']['organism_id'];
+     $cvterm_id  = $form_state['input']['cvterm_id'];
+     $cvterm_type_id  = $form_state['input']['cvterm_type_id'];
+  }
+
+
+  // FORM ELEMENTS
+  //---------------------------------------------
+  $form['expression_cvterm_organism_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Expression CVterm ID'),
+    '#required' => TRUE,
+    '#default_value' => $expression_cvterm_organism_id,
+    '#description' => t('Enter the expression cvterm id for this expression_cvterm. This name must be unique.'),
+    '#maxlength' => 255
+  );
+  // for the type_id we want to use the default vocabulary so that this field
+  // can have auto-complete functionality
+  $form['organism_id'] = array(
+    '#title'       => t('Organism ID'),
+    '#type'        => 'textfield',
+    '#description' => t("Choose the organism_id "),
+    '#required'    => TRUE,
+    '#default_value' => $organism_id,
+  );
+  // add a select box of organisms
+  $organisms = tripal_get_organism_select_options();
+  $form['cvterm_id'] = array(
+    '#title'       => t('cvterm_id'),
+    '#type'        => t('textfield'),
+    '#description' => t("Enter the cvterm_id"),
+    '#required'    => TRUE,
+    '#default_value' => $cvterm_id,
+  );
+  $form['cvterm_type_id'] = array(
+    '#title' => t('Description'),
+    '#type'        => t('textfield'),
+    '#required' => TRUE,
+    '#default_value' => $cvterm_type_id,
+    '#description' => t('Enter cvterm_type_id.'),
+  );
+
+
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_update(). This function runs after the node has been
+ * inserted into the Drupal schema and allows us to update the record in Chado.
+ *
+ * This function is not required if the hook_node_info() does not define any
+ * custom node types.
+ *
+ * @ingroup tripal_example
+ */
+function chado_expression_cvterm_organism_update($node) {
+  
+  drupal_set_message("I am here:chado_expression_cvterm_update", 'warning');
+
+/*
+  // be sure to always trim text fields
+  // use the chado_update_record() function to update the record
+  $match = array(
+    'expression_cvterm_organism_id' => $expression_cvterm_organism_id,
+  );
+  $values = array(
+//    'uniquename' => $node->uniquename,
+  );
+  $options = array('return_record' => TRUE);
+  $status = chado_update_record('expression_cvterm_organism', $match, $values, $options);
+  if (!$status) {
+    drupal_set_message(t('Unable to update example.'), 'warning');
+    tripal_report_error('tripal_example', TRIPAL_WARNING, 'Update example: Unable to update example where values: %values',
+      array('%values' => print_r($values, TRUE)));
+  }
+  */
+}
+
+function chado_expression_cvterm_organism_delete($node) {
+
+  drupal_set_message("I am here: chado_expression_cvterm_delete", 'warning');
+/*
+  // get the expression_cvterm id from the node
+  $expression_cvterm_id  = chado_get_id_from_nid('expression_cvterm', $node->nid);
+  // if we don't have a expression_cvterm id for this node then this isn't a node of type
+  // chado_expression_cvterm or the entry in the chado_expression_cvterm table was lost.
+  if (!$expression_cvterm_organism_id) {
+    return;
+  }
+  // remove the entry in the chado_exapmle table linking the deleted
+  // Drupal node with the data in Chado
+  $sql_del = "DELETE FROM {chado_expression_cvterm_organism} WHERE nid = :nid AND vid = :vid";
+  db_query($sql_del, array(':nid' => $node->nid, ':vid' => $node->vid));
+  // Remove data from expression_cvterm tables of Chado database. This will
+  // cause a cascade delete and remove all data in referencing tables
+  // for this expression_cvterm_organism
+  chado_query("DELETE FROM {expression_cvterm_organism} WHERE expression_cvterm_organism_id = :expression_cvterm_organism_id", array(':expression_cvterm_organism_id' => $expression_cvterm_organism_id));
+  // inform the user that the data was deleted
+  drupal_set_message(t("The expression_cvterm_organism and all associated data were removed from Chado"));
+*/
+}
+
+
+/**
+ * Implement hook_access(). This hook provides instructions to Drupal for which
+ * users can access the custom content types created in the function above. The
+ * available permissions are set in the chado_example_permissions() hook in the
+ * tripal_example.module file. This hook is not needed if no node types were
+ * defined in the hook_node_info() hook.
+ *
+ * @return
+ * This function should return null if it does not specifically deny access.
+ * This allows for other mechanisms to to deny or reject access. If the return
+ * value is TRUE then access is granted regardless of any other rules that might
+ * be implemented by other modules.
+ */
+function tripal_expression_cvterm_organism_node_access($node, $op, $account) {
+
+  drupal_set_message("i am here tripal_expression_cvterm_node_access", 'warning');
+
+/*
+  $node_type = $node;
+  if (is_object($node)) {
+    $node_type = $node->type;
+  }
+  // EXPLANATION:  in the tripal_expression_cvterm_permissions() function we created the
+  // permission types that are used here to check for access permissions to the
+  // 'chado_exmaple' node type.
+  if($node_type == 'chado_expression_cvterm_organism') {
+    if ($op == 'create') {
+      if (!user_access('create chado_expression_cvterm_organism content', $account)) {
+        return NODE_ACCESS_DENY;
+      }
+      return NODE_ACCESS_ALLOW;
+    }
+    if ($op == 'update') {
+      if (!user_access('edit chado_expression_cvterm_organism content', $account)) {
+        return NODE_ACCESS_DENY;
+      }
+    }
+    if ($op == 'delete') {
+      if (!user_access('delete chado_expression_cvterm_organism content', $account)) {
+        return NODE_ACCESS_DENY;
+      }
+    }
+    if ($op == 'view') {
+      if (!user_access('access chado_expression_cvterm_organism content', $account)) {
+        return NODE_ACCESS_DENY;
+      }
+    }
+  }
+  */
+  
+  return NODE_ACCESS_IGNORE;
+}
+
+
+/**
+ * Implementation of hook_load(). This function is necessary to load into the
+ * $node object the fields of the table form Chado. For example for the example
+ * table, the chado_example_load() function adds in a example object which
+ * contains all of the fields and sub objects for data in tables with foreign
+ * key relationships.
+ *
+ * This function is not required if the hook_node_info() does not define any
+ * custom node types.
+ *
+ * @ingroup tripal_example
+ */
+function chado_expression_cvterm_organism_load($nodes) {
+
+  drupal_set_message("I am here: chado_expression_cvterm_load", 'warning');
+/*
+  // EXPLANATION: when displaying or node or accessing the node in a template
+  // we need the data from Chado. This function finds the record in Chado that
+  // this node belongs to and adds the record.
+  // there may be multiple nodes that get passed in so we have to iterate
+  // through them all
+  foreach ($nodes as $nid => $node) {
+    // find the expression_cvterm_organism and add in the details
+    $expression_cvterm_organism_id = chado_get_id_from_nid('expression_cvterm_organism', $nid);
+    // if the nid does not have a matching record then skip this node.
+    // this can happen with orphaned nodes.
+    if (!$expression_cvterm_organism_id) {
+      continue;
+    }
+    // build the expression_cvterm_organism variable by using the chado_generate_var() function
+    $values = array('expression_cvterm_organism_id' => $expression_cvterm_organism_id);
+    $expression_cvterm_organism = chado_generate_var('expression_cvterm_organism', $values);
+    // for fields in the table that are of type 'text' you may want to include
+    // those by default, the chado_generate_var does not include text fields as
+    // they may be very large and including a large text field can slow the page
+    // load.
+    // If you know a text field will never be large and it is important for the
+    // other functions that will see the node to have access to a field you can
+    // include it here using the chado_expand_var() function. In most
+    // cases it is probably best to let the end-user decide if text fields
+    // should be included by using this function in the templates.
+//    $expression_cvterm_organism = chado_expand_var($expression_cvterm_organism, 'field', 'expression_cvterm_organism.description');
+    // add the new expression_cvterm_organism object to this node.
+    $nodes[$nid]->expression_cvterm_organism = $expression_cvterm_organism;
+    // If your module is using the Chado Node: Title & Path API to allow custom
+    // titles for your node type. Every time you want the title of the node, you
+    // need to use the following API function:
+    $node->title = chado_get_node_title($node);
+  }
+  */
+}
