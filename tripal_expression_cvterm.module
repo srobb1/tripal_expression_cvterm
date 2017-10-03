@@ -1,6 +1,6 @@
 <?php
 // test
-function tripal_expression_cvterm_permission() {
+function tripal_expression_cvterm_organism_permission() {
 
   // EXPLANATION:  here we want to setup any of the permission types that this
   // module needs. Our example module creates a new chado node type called
@@ -10,56 +10,56 @@ function tripal_expression_cvterm_permission() {
   // the 'People' -> 'Permissions' configuration page and allow the site admin
   // to specify which user roles are allowed to perform specific actions.
   return array(
-    'access chado_expression_cvterm content' => array(
-      'title' => t('View Examples'),
+    'access chado_expression_cvterm_organism content' => array(
+      'title' => t('View Chado Expression Cvterm Organism'),
       'description' => t('Allow users to view example pages.'),
     ),
-    'create chado_expression_cvterm content' => array(
-      'title' => t('Create Examples'),
+    'create chado_expression_cvterm_organism content' => array(
+      'title' => t('Create Chado Expression Cvterm Organism'),
       'description' => t('Allow users to create new example pages.'),
     ),
-    'delete chado_expression_cvterm content' => array(
-      'title' => t('Delete Examples'),
+    'delete chado_expression_cvterm_organism content' => array(
+      'title' => t('Delete Chado Expression Cvterm Organism'),
       'description' => t('Allow users to delete example pages.'),
     ),
-    'edit chado_expression_cvterm content' => array(
-      'title' => t('Edit Examples'),
+    'edit chado_expression_cvterm_organism content' => array(
+      'title' => t('Edit Chado Expression Cvterm Organism'),
       'description' => t('Allow users to edit example pages.'),
     ),
-    'administer chado_expression_cvterm module' => array(
-      'title' => t('Administer Chado Expression Cvterms'),
+    'administer chado_expression_cvterm_organism module' => array(
+      'title' => t('Administer Chado Expression Cvterm Organism'),
       'description' => t('Allow users to administer all examples.'),
     ),
   );
 }
 
 
-function tripal_expression_cvterm_menu() {
+function tripal_expression_cvterm_organism_menu() {
   $items = array();
    
   //  the machine name of your module
-  $module_name = 'tripal_expression_cvterm';
+  $module_name = 'tripal_expression_cvterm_organism';
 
   // the base specified in hook_node_info
   $node_type = 'chado_expression_cvterm_organism';
 
-  $items['admin/tripal/extension/tripal_expression_cvterm'] = array(
-    'title' => 'tripal_expression_cvterm',
+  $items['admin/tripal/extension/tripal_expression_cvterm_organsim'] = array(
+    'title' => 'tripal_expression_cvterm_organism',
     'description' => 'Example module for help with development of new extension modules.',
-    'page callback' => 'tripal_expression_cvterm_admin_examples_listing',
+    'page callback' => 'tripal_expression_cvterm_organism_admin_examples_listing',
     'access arguments' => array('administer tripal example'),
     'type' => MENU_NORMAL_ITEM,
     // We include the file where the 'page callback' function
     // is located.  This removes the need to include all of the
     // include files at the top of the module, and speeds
     // module loading time.
-    'file' => '/includes/tripal_expression_cvterm.admin.inc',
+    'file' => '/includes/tripal_expression_cvterm_organism.admin.inc',
   );
 
 
    // This menu item will be a tab on the admin/tripal/chado/tripal_example page
    // that is not selected by default
-   $items['admin/tripal/extension/tripal_expression_cvterm/sync'] = array(
+   $items['admin/tripal/extension/tripal_expression_cvterm_organism/sync'] = array(
      'title' => ' Sync',
      'description' => 'Sync Cvterms that are associated with Expression Images and Features from Chado with Drupal',
      'page callback' => 'drupal_get_form',
@@ -72,10 +72,10 @@ function tripal_expression_cvterm_menu() {
    return $items;
  }
 
- function tripal_expression_cvterm_node_info() {
+ function tripal_expression_cvterm_organism_node_info() {
    return array(
-     'chado_expression_cvterm' => array(
-       'name' => t('Chado Expression CVterm'),
+     'chado_expression_cvterm_organism' => array(
+       'name' => t('Chado Expression CVterm Organism'),
        'base' => 'chado_expression_cvterm_organism',
        'description' => t('A content type for displaying CVterms that have been associated with a feature and expression images'),
        'has_title' => TRUE,
@@ -104,7 +104,7 @@ function tripal_expression_cvterm_menu() {
 
 
 
-function chado_expression_cvterm_chado_node_sync_form($form, &$form_state) {
+function chado_expression_cvterm_organism_chado_node_sync_form($form, &$form_state) {
 
  if (isset($form_state['build_info']['args'][0])) {
     $module = $form_state['build_info']['args'][0];
@@ -178,7 +178,7 @@ function chado_expression_cvterm_chado_node_sync_form($form, &$form_state) {
 
   return $form;
 }
-function chado_expression_cvterm_chado_node_sync_create_new_node($new_node, $record) {
+function chado_expression_cvterm_organism_chado_node_sync_create_new_node($new_node, $record) {
 
   // Add relevant chado details to the new node object. This really only
   // needs to be the fields from the node used during node creation
@@ -188,6 +188,8 @@ function chado_expression_cvterm_chado_node_sync_create_new_node($new_node, $rec
   $new_node->description = $record->definition;
   $new_node->cvterm_id = $record->cvterm_id;
   $new_node->organism_id = $record->organism_id;
+  $new_node->cv_id = $record->cvterm_type_id;
+  
   /*
   // Add url alias, test later
   $url_name = $record->cvtname;
@@ -196,11 +198,11 @@ function chado_expression_cvterm_chado_node_sync_create_new_node($new_node, $rec
   $alias = $record->genus . '/' . $record->species . '/' . $url_name;
   $new_node->path['alias'] = $alias;
   */
-  $new_node->cv_id = $record->cvterm_type_id;
+
 
   return $new_node;
 }
-function chado_expression_cvterm_chado_node_sync_select_query($query) {
+function chado_expression_organism_cvterm_chado_node_sync_select_query($query) {
   // You can add fields to be selected. Be sure to prefix each field with the
   // tale name.
   $query['select']=array();
@@ -226,7 +228,7 @@ function chado_expression_cvterm_chado_node_sync_select_query($query) {
     $query['joins'][] = 'INNER JOIN {expression_cvterm} expression_cvterm ON expression_cvterm.cvterm_id = expression_cvterm_organism.cvterm_id';
   // base table: expression_cvterm_organism already included
 
-  $category = 'tripal_expression_cvterm';
+  $category = 'tripal_expression_cvterm_organism';
 
 
   // where_args
@@ -276,11 +278,11 @@ function chado_expression_cvterm_chado_node_sync_select_query($query) {
  *
  * @ingroup tripal_example
  */
-function chado_expression_cvterm_insert($node) {
+function chado_expression_cvterm_organism_insert($node) {
 
   drupal_set_message("I am here chado_expression_cvterm_insert", 'warning');
   
-  $expression_cvterm_id = '';
+  $expression_cvterm_organism_id = '';
   $cvterm_id = '';
   $organism_id = '';
   // if there is an expression_cvterm_id in the $node object then this must be a sync so
@@ -290,7 +292,7 @@ function chado_expression_cvterm_insert($node) {
     // Add code later to create expression_cvterm based on form.
   }
   else {
-    $expression_cvterm_id = $node-> expression_cvterm_id;
+    $expression_cvterm_organismid = $node-> expression_cvterm_id;
     $organism_id = $node-> organism_id;
     $cvterm_id = $node-> cvterm_id;
   }
@@ -328,7 +330,7 @@ function chado_expression_cvterm_insert($node) {
  *
  * @ingroup tripal_example
  */
-function chado_expression_cvterm_validate($node, $form, &$form_state) {
+function chado_expression_cvterm_organism_validate($node, $form, &$form_state) {
 
   drupal_set_message("I am here: chado_expression_cvterm_validate", 'warning');
   
@@ -347,7 +349,7 @@ function chado_expression_cvterm_validate($node, $form, &$form_state) {
 }
 
 
-function chado_expression_cvterm_form($node, &$form_state) {
+function chado_expression_cvterm_organism_form($node, &$form_state) {
 
   drupal_set_message("I am here: chado_expression_cvterm_form", 'warning');
   
@@ -386,7 +388,7 @@ function chado_expression_cvterm_form($node, &$form_state) {
   // is already part of the node, so we set the defaults from that object
  if (property_exists($node, 'expression_cvterm_organism')) {
     $expression_cvterm_organism = $node->expression_cvterm_organism;
-    $expression_cvterm_id   = $expression_cvterm_organism->expression_cvterm_id;
+    $expression_cvterm_organism_id   = $expression_cvterm_organism->expression_cvterm_organism_id;
     $organism_id   = $expression_cvterm_organism->organism_id;
     $cvterm_id  = $expression_cvterm_organism->cvterm_id;
     $cvterm_type_id  = $expression_cvterm_organism->cvterm_type_id;
@@ -465,7 +467,7 @@ function chado_expression_cvterm_form($node, &$form_state) {
  *
  * @ingroup tripal_example
  */
-function chado_expression_cvterm_update($node) {
+function chado_expression_cvterm_organism_update($node) {
   
   drupal_set_message("I am here:chado_expression_cvterm_update", 'warning');
 
@@ -488,7 +490,7 @@ function chado_expression_cvterm_update($node) {
   */
 }
 
-function chado_expression_cvterm_delete($node) {
+function chado_expression_cvterm_organism_delete($node) {
 
   drupal_set_message("I am here: chado_expression_cvterm_delete", 'warning');
 /*
@@ -526,7 +528,7 @@ function chado_expression_cvterm_delete($node) {
  * value is TRUE then access is granted regardless of any other rules that might
  * be implemented by other modules.
  */
-function tripal_expression_cvterm_node_access($node, $op, $account) {
+function tripal_expression_cvterm_organism_node_access($node, $op, $account) {
 
   drupal_set_message("i am here tripal_expression_cvterm_node_access", 'warning');
 
@@ -579,7 +581,7 @@ function tripal_expression_cvterm_node_access($node, $op, $account) {
  *
  * @ingroup tripal_example
  */
-function chado_expression_cvterm_load($nodes) {
+function chado_expression_cvterm_organism_load($nodes) {
 
   drupal_set_message("I am here: chado_expression_cvterm_load", 'warning');
 /*
