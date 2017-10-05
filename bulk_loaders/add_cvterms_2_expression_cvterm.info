@@ -1,5 +1,6 @@
 Columns:
 1. Expression Filename: to be found in expression
 2. cvterm name: to be found in cvterm
-3. 1
-4. CV Lib name: to be found in cv
+3. 0
+4. CV Lib name: to be found in cv. this is really the namespace
+5. Organism common name
