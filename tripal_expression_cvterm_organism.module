@@ -188,7 +188,8 @@ function chado_expression_cvterm_organism_chado_node_sync_create_new_node($new_n
   $new_node->description = $record->definition;
   $new_node->cvterm_id = $record->cvterm_id;
   $new_node->organism_id = $record->organism_id;
-  $new_node->cv_id = $record->cvterm_type_id;
+  $new_node->cv_id = $record->cv_id;
+  $new_node->expression_cvterm_organism_id = $record->expression_cvterm_organism_id;
   
   /*
   // Add url alias, test later
@@ -229,9 +230,6 @@ function chado_expression_cvterm_organism_chado_node_sync_select_query($query) {
   // base table: expression_cvterm_organism already included
 
   $category = 'tripal_expression_cvterm_organism';
-  $category2= 'tripal_expression_cvterm_organism_1';
-  $category3 = 'tripal_expression_cvterm_organism_2';
-  $category4 = 'tripal_expression_cvterm_organism_3';
 
 
 
@@ -294,10 +292,10 @@ function chado_expression_cvterm_organism_insert($node) {
     // Add code later to create expression_cvterm based on form.
   }
   else {
-    $expression_cvterm_organism_id = $node-> expression_cvterm_id;
-    $organism_id = $node-> organism_id;
-    $cvterm_id = $node-> cvterm_id;
-    $cv_id = $node-> cv_id;
+    $expression_cvterm_organism_id = $node->expression_cvterm_organism_id;
+    $organism_id = $node->organism_id;
+    $cvterm_id = $node->cvterm_id;
+    $cv_id = $node->cv_id;
   }
 
   // Make sure the entry for this expression_cvterm doesn't already exist in the
@@ -386,7 +384,7 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
   // initialize the defaults for the form fields
   $expression_cvterm_organism_id   = '';
   $cvterm_id = '';
-  $cvterm_type_id  = '';
+  $cv_id  = '';
 
   // if we are editing an existing node then the 'example' record from Chado
   // is already part of the node, so we set the defaults from that object
@@ -395,7 +393,7 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
     $expression_cvterm_organism_id   = $expression_cvterm_organism->expression_cvterm_organism_id;
     $organism_id   = $expression_cvterm_organism->organism_id;
     $cvterm_id  = $expression_cvterm_organism->cvterm_id;
-    $cvterm_type_id  = $expression_cvterm_organism->cvterm_type_id;
+    $cv_id  = $expression_cvterm_organism->cv_id;
     // keep track of the expression_cvterm id
     $form['expression_cvterm_organism_id'] = array(
       '#type' => 'value',
@@ -409,7 +407,7 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
      $expression_cvterm_organism_id   = $form_state['values']['expression_cvterm_organism_id'];
      $organism_id = $form_state['values']['organism_id'];
      $cvterm_id  = $form_state['values']['cvterm_id'];
-     $cvterm_type_id  = $form_state['values']['cvterm_type_id'];
+     $cv_id  = $form_state['values']['cv_id'];
   }
   // if we are re building the form from after submission (from ajax call) then
   // the values are in the $form_state['input'] array
@@ -417,7 +415,7 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
      $expression_cvterm_organism_id   = $form_state['input']['expression_cvterm_organism_id'];
      $organism_id = $form_state['input']['organism_id'];
      $cvterm_id  = $form_state['input']['cvterm_id'];
-     $cvterm_type_id  = $form_state['input']['cvterm_type_id'];
+     $cv_id  = $form_state['input']['cv_id'];
   }
 
 
@@ -449,12 +447,12 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
     '#required'    => TRUE,
     '#default_value' => $cvterm_id,
   );
-  $form['cvterm_type_id'] = array(
+  $form['cv_id'] = array(
     '#title' => t('Description'),
     '#type'        => t('textfield'),
     '#required' => TRUE,
-    '#default_value' => $cvterm_type_id,
-    '#description' => t('Enter cvterm_type_id.'),
+    '#default_value' => $cv_id,
+    '#description' => t('Enter cv_id.'),
   );
 
 
