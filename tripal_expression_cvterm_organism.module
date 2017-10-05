@@ -392,7 +392,9 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
 
   // if we are editing an existing node then the 'example' record from Chado
   // is already part of the node, so we set the defaults from that object
- if (property_exists($node, 'expression_cvterm_organism_id')) {
+ dpm($node, 'node');
+ if (property_exists($node, 'expression_cvterm_organism')) {
+    drupal_set_message("Property exists", 'warning');
     $expression_cvterm_organism = $node->expression_cvterm_organism;
     $expression_cvterm_organism_id   = $expression_cvterm_organism->expression_cvterm_organism_id;
     $organism_id   = $expression_cvterm_organism->organism_id;
@@ -404,6 +406,10 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
       '#value' => $expression_cvterm_organism_id,
     );
   }
+else {
+  drupal_set_message("Property does not exists", 'warning');
+
+}
 
   // if we are re constructing the form from a failed validation or ajax
   // callback then use the $form_state['values'] values
