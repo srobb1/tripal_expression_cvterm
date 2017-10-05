@@ -256,10 +256,10 @@ function chado_expression_cvterm_organism_chado_node_sync_select_query($query) {
   }
 
   // add more where_clauses
-     $query['where_clauses'][$category][] = 'expression_cvterm_organism.cvterm_id = expression_cvterm.cvterm_id';
-     $query['where_clauses'][$category2][] = 'expression_cvterm_organism.cv_id = expression_cvterm.cvterm_type_id';
-     $query['where_clauses'][$category3][] = 'expression_cvterm_organism.organism_id = organism.organism_id';
-     $query['where_clauses'][$category4][] = 'expression_cvterm.cvterm_type_id = :cv_id';
+     $query['where_clauses'][$category][] = 'expression_cvterm_organism.cvterm_id = expression_cvterm.cvterm_id AND expression_cvterm_organism.cv_id = expression_cvterm.cvterm_type_id AND expression_cvterm_organism.organism_id = organism.organism_id AND expression_cvterm.cvterm_type_id = :cv_id';
+ //    $query['where_clauses'][$category][] = 'expression_cvterm_organism.cv_id = expression_cvterm.cvterm_type_id';
+ //    $query['where_clauses'][$category][] = 'expression_cvterm_organism.organism_id = organism.organism_id';
+ //    $query['where_clauses'][$category4][] = 'expression_cvterm.cvterm_type_id = :cv_id';
  
   // Must return the updated query
   return $query;
