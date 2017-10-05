@@ -196,7 +196,8 @@ function chado_expression_cvterm_organism_chado_node_sync_create_new_node($new_n
   $url_name = $record->cvtname;
   $url_name = str_replace('/\s+/' , '' , $url_name);
   $url_name = strtolower($url_name);
-  $alias = $record->genus . '/' . $record->species . '/' . $url_name;
+  $species = str_replace('/\s+/' , '-' , $url_name);
+  $alias = $record->genus . '/' . $species . '/' . $url_name;
   $new_node->path['alias'] = $alias;
 
 
