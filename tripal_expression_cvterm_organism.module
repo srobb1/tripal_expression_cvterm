@@ -215,6 +215,8 @@ function chado_expression_cvterm_organism_chado_node_sync_select_query($query) {
   $query['select'][] = 'cvterm.cvterm_id';
   $query['select'][] = 'cvterm.name as cvtname';
   $query['select'][] = 'cvterm.definition';
+  $query['select'][] = 'expression_cvterm_organism.*';
+  
 
 
   // Provide any join you may need to the joins array. Be sure to wrap the
