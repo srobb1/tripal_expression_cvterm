@@ -191,14 +191,14 @@ function chado_expression_cvterm_organism_chado_node_sync_create_new_node($new_n
   $new_node->cv_id = $record->cv_id;
   $new_node->expression_cvterm_organism_id = $record->expression_cvterm_organism_id;
   
-  /*
+
   // Add url alias, test later
   $url_name = $record->cvtname;
   $url_name = str_replace('/\s+/' , $url_name);
   $url_name = strtolower($url_name);
   $alias = $record->genus . '/' . $record->species . '/' . $url_name;
   $new_node->path['alias'] = $alias;
-  */
+
 
 
   return $new_node;
