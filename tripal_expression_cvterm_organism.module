@@ -300,7 +300,7 @@ function chado_expression_cvterm_organism_insert($node) {
   // Make sure the entry for this expression_cvterm doesn't already exist in the
   // chado_ expression_cvterm table if it doesn't exist then we want to add it.
   // This is also how the linking record gets added during a sync.
-  $check_org_id = chado_get_id_from_nid('expression_cvtermi_organism', $node->nid);
+  $check_org_id = chado_get_id_from_nid('expression_cvterm_organism', $node->nid);
   if (!$check_org_id) {
     $record = new stdClass();
     $record->nid = $node->nid;
