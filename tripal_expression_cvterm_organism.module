@@ -229,6 +229,10 @@ function chado_expression_cvterm_organism_chado_node_sync_select_query($query) {
   // base table: expression_cvterm_organism already included
 
   $category = 'tripal_expression_cvterm_organism';
+  $category2= 'tripal_expression_cvterm_organism_1';
+  $category3 = 'tripal_expression_cvterm_organism_2';
+  $category4 = 'tripal_expression_cvterm_organism_3';
+
 
 
   // where_args
@@ -252,11 +256,10 @@ function chado_expression_cvterm_organism_chado_node_sync_select_query($query) {
   }
 
   // add more where_clauses
-//   $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_id <> CT.cvterm_id';
      $query['where_clauses'][$category][] = 'expression_cvterm_organism.cvterm_id = expression_cvterm.cvterm_id';
-     $query['where_clauses'][$category][] = 'expression_cvterm_organism.cv_id = expression_cvterm.cvterm_type_id';
-     $query['where_clauses'][$category][] = 'expression_cvterm_organism.organism_id = organism.organism_id';
-     $query['where_clauses'][$category][] = 'expression_cvterm.cvterm_type_id = :cv_id';
+     $query['where_clauses'][$category2][] = 'expression_cvterm_organism.cv_id = expression_cvterm.cvterm_type_id';
+     $query['where_clauses'][$category3][] = 'expression_cvterm_organism.organism_id = organism.organism_id';
+     $query['where_clauses'][$category4][] = 'expression_cvterm.cvterm_type_id = :cv_id';
  
   // Must return the updated query
   return $query;
