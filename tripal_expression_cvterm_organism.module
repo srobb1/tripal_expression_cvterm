@@ -210,6 +210,7 @@ function chado_expression_cvterm_organism_chado_node_sync_select_query($query) {
   $query['select'][] = 'DISTINCT organism.organism_id';
   $query['select'][] = 'organism.genus';
   $query['select'][] = 'organism.species';
+  $query['select'][] = 'organism.common_name';
   $query['select'][] = 'cv.cv_id';
   $query['select'][] = 'cv.name as cvname';
   $query['select'][] = 'cvterm.cvterm_id';
