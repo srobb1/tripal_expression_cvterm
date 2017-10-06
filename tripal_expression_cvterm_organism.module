@@ -596,7 +596,6 @@ function tripal_expression_cvterm_organism_node_access($node, $op, $account) {
 function chado_expression_cvterm_organism_load($nodes) {
 
   drupal_set_message("I am here: chado_expression_cvterm_load", 'warning');
-/*
   // EXPLANATION: when displaying or node or accessing the node in a template
   // we need the data from Chado. This function finds the record in Chado that
   // this node belongs to and adds the record.
@@ -628,7 +627,7 @@ function chado_expression_cvterm_organism_load($nodes) {
     // If your module is using the Chado Node: Title & Path API to allow custom
     // titles for your node type. Every time you want the title of the node, you
     // need to use the following API function:
-    $node->title = chado_get_node_title($node);
+//    $node->title = chado_get_node_title($node);
+
   }
-  */
 }
