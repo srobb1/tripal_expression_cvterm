@@ -398,7 +398,7 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
     $expression_cvterm_organism = $node->expression_cvterm_organism;
     $expression_cvterm_organism_id   = $expression_cvterm_organism->expression_cvterm_organism_id;
     $organism_id   = $expression_cvterm_organism->organism_id;
-    $cvterm_id  = $expression_cvterm_organism->cvterm_id;
+    $cvterm_id  = $expression_cvterm_organism->cvterm_id->cvterm_id;
     $cv_id  = $expression_cvterm_organism->cv_id;
     // keep track of the expression_cvterm id
     $form['expression_cvterm_organism_id'] = array(
