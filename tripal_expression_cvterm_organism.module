@@ -1,5 +1,18 @@
 <?php
 // test
+
+//function tripal_expression_cvterm_organism_theme() {
+//  return array(
+//    'node__tripal_expression_cvterm_organism' => array(
+//        'variables' => array('results' => null),
+//        'render element' => 'node',
+//        'base hook' => 'node',
+//        'template' => 'tripal-expression-cvterm-organism',
+//     ),
+//  );
+//}
+
+
 function tripal_expression_cvterm_organism_permission() {
 
   // EXPLANATION:  here we want to setup any of the permission types that this
@@ -69,7 +82,27 @@ function tripal_expression_cvterm_organism_menu() {
      'weight' => 0
    );
 
+   $items['term/'] = array(
+    'page callback' => 'tripal_expression_cvterm_organism_getInfo',
+    'access arguments' => array('access content'),
+    'access callback' => true,
+    'type' => MENU_CALLBACK,
+    );
+
    return $items;
+ }
+ 
+ function tripal_expression_cvterm_organism_getInfo($genus,$species,$term){
+   $expression_cvterm_organism = array( 'genus' => $genus , 'species' => $species , 'term' => $term );
+   // put data into $expression_cvterm_organism for the page
+   // title
+   // term
+   // image names with this term 
+   // genes that reference this term
+   // experiements of the images, and the corresponding images
+   // authors of the exeperiments, and all their corresponding images
+   
+   return theme('tripal_expression_cvterm_organism',array('results' => $expression_cvterm_organism));  
  }
 
  function tripal_expression_cvterm_organism_node_info() {
@@ -180,18 +213,20 @@ function chado_expression_cvterm_organism_chado_node_sync_form($form, &$form_sta
 }
 function chado_expression_cvterm_organism_chado_node_sync_create_new_node($new_node, $record) {
 
+
   // Add relevant chado details to the new node object. This really only
   // needs to be the fields from the node used during node creation
   // including values used to generate the title, etc. All additional chado
   // data will be added via nodetype_load when the node is later used
   $new_node->title = "$record->genus $record->species ($record->common_name): $record->cvtname";
-  $new_node->description = $record->definition;
+  $new_node->description = $record->cvterm_id->definition;
+  $new_node->definition = $record->cvterm_id->definition;
   $new_node->cvterm_id = $record->cvterm_id;
   $new_node->organism_id = $record->organism_id;
   $new_node->cv_id = $record->cv_id;
   $new_node->expression_cvterm_organism_id = $record->expression_cvterm_organism_id;
   
-
+/*
   // Add url alias, test later
   $url_name = $record->cvtname;
   $url_name = str_replace(' ' , '' , $url_name);
@@ -199,9 +234,9 @@ function chado_expression_cvterm_organism_chado_node_sync_create_new_node($new_n
   $species = str_replace(' ' , '-' , $record->species);
   $alias = 'term/' . $record->genus . '/' . $species . '/' . $url_name;
   $new_node->path['alias'] = $alias;
+*/
 
-
-
+ 
   return $new_node;
 }
 function chado_expression_cvterm_organism_chado_node_sync_select_query($query) {
@@ -389,6 +424,7 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
   $expression_cvterm_organism_id   = '';
   $cvterm_id = '';
   $cv_id  = '';
+  $cvterm_definition = '';
 
   // if we are editing an existing node then the 'example' record from Chado
   // is already part of the node, so we set the defaults from that object
@@ -397,9 +433,10 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
     drupal_set_message("Property exists", 'warning');
     $expression_cvterm_organism = $node->expression_cvterm_organism;
     $expression_cvterm_organism_id   = $expression_cvterm_organism->expression_cvterm_organism_id;
-    $organism_id   = $expression_cvterm_organism->organism_id;
+    $organism_id   = $expression_cvterm_organism->organism_id->organism_id;
     $cvterm_id  = $expression_cvterm_organism->cvterm_id->cvterm_id;
-    $cv_id  = $expression_cvterm_organism->cv_id;
+    $cvterm_definition  = $expression_cvterm_organism->cvterm_id->definition;
+    $cv_id  = $expression_cvterm_organism->cv_id->cv_id;
     // keep track of the expression_cvterm id
     $form['expression_cvterm_organism_id'] = array(
       '#type' => 'value',
@@ -418,6 +455,7 @@ else {
      $organism_id = $form_state['values']['organism_id'];
      $cvterm_id  = $form_state['values']['cvterm_id'];
      $cv_id  = $form_state['values']['cv_id'];
+     $cvterm_definition  = $form_state['values']['definition'];
   }
   // if we are re building the form from after submission (from ajax call) then
   // the values are in the $form_state['input'] array
@@ -426,6 +464,7 @@ else {
      $organism_id = $form_state['input']['organism_id'];
      $cvterm_id  = $form_state['input']['cvterm_id'];
      $cv_id  = $form_state['input']['cv_id'];
+     $cvterm_definition  = $form_state['input']['definition'];
   }
 
 
@@ -433,10 +472,10 @@ else {
   //---------------------------------------------
   $form['expression_cvterm_organism_id'] = array(
     '#type' => 'textfield',
-    '#title' => t('Expression CVterm ID'),
+    '#title' => t('Expression CVterm Organism ID'),
     '#required' => TRUE,
     '#default_value' => $expression_cvterm_organism_id,
-    '#description' => t('Enter the expression cvterm id for this expression_cvterm. This name must be unique.'),
+    '#description' => t('Enter the expression cvterm organism id for this expression_cvterm. This name must be unique.'),
     '#maxlength' => 255
   );
   // for the type_id we want to use the default vocabulary so that this field
@@ -458,12 +497,21 @@ else {
     '#default_value' => $cvterm_id,
   );
   $form['cv_id'] = array(
-    '#title' => t('Description'),
+    '#title' => t('cv_id'),
     '#type'        => t('textfield'),
     '#required' => TRUE,
     '#default_value' => $cv_id,
     '#description' => t('Enter cv_id.'),
   );
+  $form['definition'] = array(
+    '#title' => t('Definition'),
+    '#type'        => t('textfield'),
+    '#required' => TRUE,
+    '#default_value' => $cvterm_definition,
+    '#description' => t('Enter cv_id.'),
+    '#maxlength' => 5555
+  );
+
 
 
 
@@ -621,7 +669,7 @@ function chado_expression_cvterm_organism_load($nodes) {
     // include it here using the chado_expand_var() function. In most
     // cases it is probably best to let the end-user decide if text fields
     // should be included by using this function in the templates.
-//    $expression_cvterm_organism = chado_expand_var($expression_cvterm_organism, 'field', 'expression_cvterm_organism.description');
+    $expression_cvterm_organism = chado_expand_var($expression_cvterm_organism, 'field', 'cvterm.definition');
     // add the new expression_cvterm_organism object to this node.
     $nodes[$nid]->expression_cvterm_organism = $expression_cvterm_organism;
     // If your module is using the Chado Node: Title & Path API to allow custom
@@ -629,5 +677,63 @@ function chado_expression_cvterm_organism_load($nodes) {
     // need to use the following API function:
 //    $node->title = chado_get_node_title($node);
 
+  }
+}
+
+
+function tripal_expression_cvterm_organism_node_insert($node) {
+  // EXPLANATION: This function is used after any a node is inserted into the
+  // database. It is different from the hook_insert() function above in that it
+  // is called after any node is saved, regardless of it's type. This function
+  // is useful for making changes to the database after a node is inserted.
+  // An example comes from the tripal_feature module where the URL alias of a
+  // node cannot be set in the hook_insert() function. Therefore the
+  // tripal_feature module uses this function to set the URL path of a newly
+  // inserted example node.
+  //
+  // This function is not required. You probably won't need it if you don't
+  // define a custom node type in the hook_node_info() function. But it is node
+  // type agnostic, so you can use this function to do any activity after insert
+  // of any node.
+  // the Example code below will set the URL path after inserting. We do it here
+  // because we do not know the example_id in the pre-save and cannot do it in
+  // the hook_insert()
+  switch ($node->type) {
+    case 'chado_expression_cvterm_organism':
+      // find the example and add in the details
+      $example_id = chado_get_id_from_nid('expression_cvterm_organism', $nid);
+      // build the example variable by using the chado_generate_var() function
+      $values = array('example_id' => $expression_cvterm_organism_id);
+      $example = chado_generate_var('expression_cvterm_organism', $values);
+      $node->expression_cvterm_organism = $expression_cvterm_organism;
+      // EXPLANATION: You can allow the site admin to customize the
+      // title and URL of your node.  The 'Chado Node: Title & Path API'
+      // contains two functions that can be called to generate the title and
+      // URL based a schema provided by the site admin. These functions are
+      // named chado_get_node_title() and chado_set_node_url().  These
+      // functions use a string of tokens to build the URL and titles and the
+      // site admin has the ability to set these tokens.  There are
+      // form elements made available in the tripal_example_admin() function
+      // that allow the admin to set these tokens.  The default token string
+      // is provided to Tripal using two hook functions, and are found below.
+      // These are: chado_exmaple_chado_node_default_title() and
+      // chado_example_chdo_node_default_url().
+      // Set the Title and URL for this node.
+//      $example->title = chado_get_node_title($node);
+//      chado_set_node_url($node);
+  // Add url alias, test later
+  $source_url = 'node/' . $node->nid;
+  $url_name = $expression_cvterm_organism->cvterm_id->name;
+  $url_name = str_replace(' ' , '' , $url_name);
+  $url_name = strtolower($url_name);
+  $species = str_replace(' ' , '-' , $expression_cvterm_organism->orgainism_id->species);
+  $alias = 'term/' . $expression_cvterm_organism->organism_id->genus . '/' . $species . '/' . $url_name;
+  $expression_cvterm_organism->path['alias'] = $alias;
+      $path = array(
+        'source' => $source_url,
+        'alias' => $lias
+      );
+      path_save($path);
+      break;
   }
 }
