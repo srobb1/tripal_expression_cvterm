@@ -701,9 +701,9 @@ function tripal_expression_cvterm_organism_node_insert($node) {
   switch ($node->type) {
     case 'chado_expression_cvterm_organism':
       // find the example and add in the details
-      $example_id = chado_get_id_from_nid('expression_cvterm_organism', $nid);
+      $chado_expression_cvterm_organism = chado_get_id_from_nid('expression_cvterm_organism', $nid);
       // build the example variable by using the chado_generate_var() function
-      $values = array('example_id' => $expression_cvterm_organism_id);
+      $values = array('chado_expression_cvterm_organism_id' => $expression_cvterm_organism_id);
       $example = chado_generate_var('expression_cvterm_organism', $values);
       $node->expression_cvterm_organism = $expression_cvterm_organism;
       // EXPLANATION: You can allow the site admin to customize the
@@ -731,7 +731,7 @@ function tripal_expression_cvterm_organism_node_insert($node) {
   $expression_cvterm_organism->path['alias'] = $alias;
       $path = array(
         'source' => $source_url,
-        'alias' => $lias
+        'alias' => $alias
       );
       path_save($path);
       break;
