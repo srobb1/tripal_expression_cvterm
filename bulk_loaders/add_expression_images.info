@@ -12,7 +12,7 @@ Columns:
 11. Expression Image file name (unique)
 12. Figure legend
 13. Feature.uniquename
-14. Image type (single or panel)
+14. Image type (image or movie)[currently png,m4v]
 
 new test3	55555	SIMR Notebook	2017	23-26	smr. Title3. Test. Vloume. Bla	Unpublished Works	Author	Citation	smr	test_file_name_11	fig legend	ENSAMXT00000017644	Single
 new test3	55555	SIMR Notebook	2017	23-26	smr. Title3. Test. Vloume. Bla	Unpublished Works	Author	Citation	smr	test_file_name_12	fig legend	ENSAMXT00000017644	Single
