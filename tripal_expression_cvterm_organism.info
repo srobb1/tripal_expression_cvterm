@@ -9,3 +9,10 @@ dependencies[] = trpdownload_api
 ; module should be specified here.
 ;
 stylesheets[all][] = theme/css/tripal_expression_cvterm_organism.css
+
+
+;
+; Javascript files that should always be available for the
+; module should be specified here.
+;
+scripts[]          = theme/js/tripal_expression_cvterm_organism.js
