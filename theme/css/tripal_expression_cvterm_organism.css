@@ -38,6 +38,7 @@
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   text-align: center;
+    z-index: 50;
 }
 
 .caption_container:hover .caption_image {
@@ -53,6 +54,7 @@
   color: white;
   font-size: 16px;
   padding: 16px 32px;
+    width: 300px;
 }
 /* Style the buttons */
 .btn {
