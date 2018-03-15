@@ -21,7 +21,7 @@ dpm($node, 'node');
 $cvterm_name = $node->expression_cvterm_organism->cvterm_id->name;
 $cvterm_id = $node->expression_cvterm_organism->cvterm_id->cvterm_id;
 $organism_id = $node->expression_cvterm_organism->organism_id->organism_id;
-$sql = "SELECT ec.expression_id ,p.title , pp1.value as author , p.uniquename as pub_uniquename, i.image_uri, f.uniquename, f.name from {expression_cvterm} ec, {feature_expression} fe, {feature} f , {expression_image} ei , {eimage} i , {expression_pub} ep, {pub} p , {pubprop} pp1, {cvterm} cvt1  where p.pub_id = pp1.pub_id and pp1.type_id = cvt1.cvterm_id and cvt1.name = 'Author' and  ec.expression_id = ep.expression_id and ep.pub_id = p.pub_id and i.eimage_id = ei.eimage_id and ei.expression_id = ec.expression_id and ec.expression_id = fe.expression_id and fe.feature_id = f.feature_id and f.organism_id = :organism_id and ec.cvterm_id = :cvterm_id";
+$sql = "SELECT ec.expression_id ,p.title , pp1.value as author , p.uniquename as pub_uniquename, i.image_uri, f.uniquename, f.name from {expression_cvterm} ec, {feature_expression} fe, {feature} f , {expression_image} ei , {eimage} i , {expression_pub} ep, {pub} p , {pubprop} pp1, {cvterm} cvt1  where p.pub_id = pp1.pub_id and pp1.type_id = cvt1.cvterm_id and cvt1.name = 'Author' and  ec.expression_id = ep.expression_id and ep.pub_id = p.pub_id and i.eimage_id = ei.eimage_id and ei.expression_id = ec.expression_id and ec.expression_id = fe.expression_id and fe.feature_id = f.feature_id and f.organism_id = :organism_id and ec.cvterm_id = :cvterm_id and i.image_uri NOT LIKE '%Panel%' and i.image_uri NOT LIKE '%m4v' and i.image_uri NOT LIKE '%mv4'";
 $args = array( ':cvterm_id' => $cvterm_id , ':organism_id' => $organism_id );
 $result = chado_query( $sql, $args );
 
@@ -73,7 +73,7 @@ $all_images=array_unique($all_images);
 // subdivide by experiment
 // list of experimetns that reference this term
 
-$image_dir = '/pub/analysis/wish/single/';
+$image_dir = '/pub/analysis/wish/image/';
 $count = count($all_images);
 $gene_count = count($feature_images);
 //print "<h2>$cvterm_name </h2>";
@@ -224,6 +224,13 @@ print "<p><a href=\"#top\">back to top</a></p><br>";
 
 print "<a name=\"gene\"></a>";
 print "<h2> Images($count) By Gene($gene_count)</h2>";
+print '
+  <p>Click on the buttons to change the grid view.</p>
+  <button class="btn" onclick="one(\'gene_column\')">1</button>
+  <button class="btn active" onclick="two(\'gene_column\')">2</button>
+  <button class="btn" onclick="four(\'gene_column\')">4</button>
+<br><br>
+';
 ksort($feature_images);
 foreach ($feature_images as $feature => $feature_image_array){
 $name = $features[$feature];
@@ -247,23 +254,40 @@ foreach ($feature_image_array as $image){
     )
   );
   if (preg_match('/(png|jpeg|jpg)$/', $image)){
-    $images[] = "<figure><a href=\"$image_dir/$image\"><img src=\"$image_dir/$image\"></a><figcaption>$collapse</figcaption></figure>";
+    $images[] = "<div class=\"caption_container\"><a href=\"$image_dir/$image\"><img style=\"width:100%\" class=\"caption_image\" src=\"$image_dir/$image\" ></a><div class=\"caption_middle\"><div class=\"caption_text\">$caption</div></div></div>";
+  //  $images[] = "<figure><a href=\"$image_dir/$image\"><img src=\"$image_dir/$image\"></a><figcaption>$collapse</figcaption></figure>";
   }else{
-    $images[] = "<figure><video width=\"550\" controls><source src=\"$image_dir/$image\">Your browser doesn\'t support HTML5 video in MP4 with H.264. </video><figcaption>$collapse</figcaption></figure>";
+    $videos[] = "<video width=\"550\" controls><source src=\"$image_dir/$image\">Your browser doesn\'t support HTML5 video in MP4 with H.264. </video>";
+//    $images[] = "<figure><video width=\"550\" controls><source src=\"$image_dir/$image\">Your browser doesn\'t support HTML5 video in MP4 with H.264. </video><figcaption>$collapse</figcaption></figure>";
   }
 }
 $each_image_count = count($images);
-print('
+$columns = partition($images,4);
+print '
 <fieldset class=" collapsible collapsed">
   <legend><span class="fieldset-legend">' . $name . " [" . $feature . "] ($each_image_count)" . '</span></legend>
-  <div class="fieldset-wrapper">
-    <h3>Content goes here</h3>
-    <p><figure>' .
-       join("\n",$images)
-      .
-    '</figure></p>
-  </div>
-</fieldset>');
+  <div class="fieldset-wrapper"> ' ;
+
+print '<div class="row"> ';
+print '  <div class="gene_column">';
+print join("\n",$columns[0]);
+print '  </div>';
+
+print '  <div class="gene_column">';
+print join("\n",$columns[1]);
+print '  </div>';
+
+print '  <div class="gene_column">';
+print join("\n",$columns[2]);
+print '  </div>';
+
+print '  <div class="gene_column">';
+print join("\n",$columns[3]);
+print '  </div>';
+print '  </div>';
+print '</div>
+</fieldset>';
+
 }
 print "<p><a href=\"#top\">back to top</a></p><br>";
 
@@ -273,6 +297,13 @@ print "<p><a href=\"#top\">back to top</a></p><br>";
 $experiment_count = count($experiments);
 print "<a name=\"experiment\"></a>"; 
 print "<h2> Images($count) By Experiment($experiment_count)</h2>";
+print '
+  <p>Click on the buttons to change the grid view.</p>
+  <button class="btn" onclick="one(\'experiment_column\')">1</button>
+  <button class="btn active" onclick="two(\'experiment_column\')">2</button>
+  <button class="btn" onclick="four(\'experiment_column\')">4</button>
+<br><br>
+';
 foreach ($experiments as $exp => $image_array){
 //$name = $features[$exp];
 $images=array();
@@ -294,29 +325,53 @@ foreach ($image_array as $image){
     )
   );
   if (preg_match('/(png|jpeg|jpg)$/', $image)){
-    $images[] = "<figure><a href=\"$image_dir/$image\"><img src=\"$image_dir/$image\"></a><figcaption>$collapse</figcaption></figure>";
+  //  $images[] = "<figure><a href=\"$image_dir/$image\"><img src=\"$image_dir/$image\"></a><figcaption>$collapse</figcaption></figure>";
+   $images[] = "<div class=\"caption_container\"><a href=\"$image_dir/$image\"><img style=\"width:100%\" class=\"caption_image\" src=\"$image_dir/$image\" ></a><div class=\"caption_middle\"><div class=\"caption_text\">$caption</div></div></div>";
   }else{
-    $images[] = "<figure><video width=\"550\" controls><source src=\"$image_dir/$image\">Your browser doesn\'t support HTML5 video in MP4 with H.264. </video><figcaption>$collapse</figcaption></figure>";
+  //  $images[] = "<figure><video width=\"550\" controls><source src=\"$image_dir/$image\">Your browser doesn\'t support HTML5 video in MP4 with H.264. </video><figcaption>$collapse</figcaption></figure>";
+   $videos[] = "<video width=\"550\" controls><source src=\"$image_dir/$image\">Your browser doesn\'t support HTML5 video in MP4 with H.264. </video>";
   }
 }
 $each_image_count = count($images);
-print('
+$columns = partition($images,4);
+print '
 <fieldset class=" collapsible collapsed">
   <legend><span class="fieldset-legend">' . "$exp ( $each_image_count )" . '</span></legend>
-  <div class="fieldset-wrapper">
-    <h3>Content goes here</h3>
-    <p><figure>' .
-       join("\n",$images)
-      .
-    '</figure></p>
-  </div>
-</fieldset>');
+  <div class="fieldset-wrapper"> ';
+
+print '<div class="row"> ';
+print '  <div class="experiment_column">';
+print join("\n",$columns[0]);
+print '  </div>';
+
+print '  <div class="experiment_column">';
+print join("\n",$columns[1]);
+print '  </div>';
+
+print '  <div class="experiment_column">';
+print join("\n",$columns[2]);
+print '  </div>';
+
+print '  <div class="experiment_column">';
+print join("\n",$columns[3]);
+print '  </div>';
+print '  </div>';
+
+print '  </div>
+</fieldset>';
 }
 print "<p><a href=\"#top\">back to top</a></p><br>";
 
 $author_count = count($authors);
 print "<a name=\"experimenter\"></a>"; 
 print "<h2> Images($count) By Experimenter($author_count)</h2>";
+print '
+  <p>Click on the buttons to change the grid view.</p>
+  <button class="btn" onclick="one(\'experimenter_column\')">1</button>
+  <button class="btn active" onclick="two(\'experimenter_column\')">2</button>
+  <button class="btn" onclick="four(\'experimenter_column\')">4</button>
+<br><br>
+';
 foreach ($authors as $author => $image_array){
 //$name = $features[$exp];
 $images=array();
@@ -337,20 +392,39 @@ foreach ($image_array as $image){
       'collapsed' => TRUE
     )
   );
-  $images[] = "<figure><a href=\"$image_dir/$image\"><img src=\"$image_dir/$image\"></a><figcaption>$collapse</figcaption></figure>";
+   if (preg_match('/(png|jpeg|jpg)$/', $image)){
+    $images[] = "<div class=\"caption_container\"><a href=\"$image_dir/$image\"><img style=\"width:100%\" class=\"caption_image\" src=\"$image_dir/$image\" ></a><div class=\"caption_middle\"><div class=\"caption_text\">$caption</div></div></div>";
+  }else{
+    $videos[] = "<video width=\"550\" controls><source src=\"$image_dir/$image\">Your browser doesn\'t support HTML5 video in MP4 with H.264. </video>";
+  }
 }
 $each_image_count = count($images);
-print('
+$columns = partition($images,4);
+print'
 <fieldset class=" collapsible collapsed">
   <legend><span class="fieldset-legend">' . "$author ( $each_image_count )" . '</span></legend>
-  <div class="fieldset-wrapper">
-    <h3>Content goes here</h3>
-    <p><figure>' .
-       join("\n",$images)
-      .
-    '</figure></p>
-  </div>
-</fieldset>');
+  <div class="fieldset-wrapper">';
+
+print '<div class="row"> ';
+print '  <div class="experimenter_column">';
+print join("\n",$columns[0]);
+print '  </div>';
+
+print '  <div class="experimenter_column">';
+print join("\n",$columns[1]);
+print '  </div>';
+
+print '  <div class="experimenter_column">';
+print join("\n",$columns[2]);
+print '  </div>';
+
+print '  <div class="experimenter_column">';
+print join("\n",$columns[3]);
+print '  </div>';
+print '  </div>';
+
+print '  </div>
+</fieldset>';
 }
 print "<p><a href=\"#top\">back to top</a></p><br>";
 ?>
