@@ -14,28 +14,13 @@ function partition( $list, $p ) {
     return $partition;
 }
 
-print '
-<script>function collapseAll(){
-  $(".collapsible").addClass("collapsed");
-}
-
-function expandAll(){
-  $(".collapsible").removeClass(function(){
-    return "collapsed";
-  });
-}
-//# sourceURL=pen.js
-</script>
-';
 
 drupal_add_library('system', 'drupal.collapse');
-
-dpm($node, 'node');
 
 $cvterm_name = $node->expression_cvterm_organism->cvterm_id->name;
 $cvterm_id = $node->expression_cvterm_organism->cvterm_id->cvterm_id;
 $organism_id = $node->expression_cvterm_organism->organism_id->organism_id;
-$sql = "SELECT ec.expression_id ,p.title , pp1.value as author , p.uniquename as pub_uniquename, i.image_uri, f.uniquename, f.name from {expression_cvterm} ec, {feature_expression} fe, {feature} f , {expression_image} ei , {eimage} i , {expression_pub} ep, {pub} p , {pubprop} pp1, {cvterm} cvt1  where p.pub_id = pp1.pub_id and pp1.type_id = cvt1.cvterm_id and cvt1.name = 'Author' and  ec.expression_id = ep.expression_id and ep.pub_id = p.pub_id and i.eimage_id = ei.eimage_id and ei.expression_id = ec.expression_id and ec.expression_id = fe.expression_id and fe.feature_id = f.feature_id and f.organism_id = :organism_id and ec.cvterm_id = :cvterm_id";
+$sql = "SELECT ec.expression_id ,p.title , pp1.value as author , p.uniquename as pub_uniquename, i.image_uri, f.uniquename, f.name from {expression_cvterm} ec, {feature_expression} fe, {feature} f , {expression_image} ei , {eimage} i , {expression_pub} ep, {pub} p , {pubprop} pp1, {cvterm} cvt1  where p.pub_id = pp1.pub_id and pp1.type_id = cvt1.cvterm_id and cvt1.name = 'Author' and  ec.expression_id = ep.expression_id and ep.pub_id = p.pub_id and i.eimage_id = ei.eimage_id and ei.expression_id = ec.expression_id and ec.expression_id = fe.expression_id and fe.feature_id = f.feature_id and f.organism_id = :organism_id and ec.cvterm_id = :cvterm_id and i.image_uri NOT LIKE '%Panel%' and i.image_uri NOT LIKE '%m4v' and i.image_uri NOT LIKE '%mv4'";
 $args = array( ':cvterm_id' => $cvterm_id , ':organism_id' => $organism_id );
 $result = chado_query( $sql, $args );
 
@@ -80,13 +65,6 @@ foreach ($result as $r) {
 
  }
 $all_images=array_unique($all_images);
-dpm($all_images, 'images');
-dpm($features, 'features');
-dpm($authors, 'authors');
-dpm($experiments, 'exp');
-dpm($image_terms, 'image_terms');
-dpm($image_features, 'image_features');
-dpm($feature_images, 'feature_images');
 // page title be genus species term
 // list the images with this term
 // list all genes that reference this term
@@ -94,28 +72,24 @@ dpm($feature_images, 'feature_images');
 // subdivide by experiment
 // list of experimetns that reference this term
 
-$image_dir = '/pub/analysis/wish/single/';
+$image_dir = '/pub/analysis/wish/image/';
 $count = count($all_images);
-$gene_count = count($feature_images);
-//print "<h2>$cvterm_name </h2>";
-print ' <a class="waves-effect waves-light btn" onClick="expandAll();">Expand All</a> 
-  <a class="waves-effect waves-light btn" onClick="collapseAll();">Collapse All</a>
-<br /><br />';
 print "
 <p><a name=\"top\"></a></p>
 <h1>All images that have been tagged with the term <strong>$cvterm_name</strong> are displayed below.</h1>
 <br><hr>
-<h2>&#9758; <a href=\"#all\">All Images</a></h2>
-<h2>&#9758; <a href=\"#gene\">Images sorted by Gene</a></h2>
-<h2>&#9758; <a href=\"#experiment\">Images sorted by Experiment</a></h2>
-<h2>&#9758; <a href=\"#experimenter\">Images sorted by Experimenter</a></h2>
 ";
 
 
 
-print "<a name=\"all\"></a>";
-print "<br><hr><hr><br>";
-print "<h2> All Images($count)</h2>";
+print "<h2>Image Total: $count</h2>";
+print '
+  <p>Click on the buttons to change the grid view.</p>
+  <button class="btn" onclick="one(\'all_column\')">1</button>
+  <button class="btn active" onclick="two(\'all_column\')">2</button>
+  <button class="btn" onclick="four(\'all_column\')">4</button>
+<br><br>
+';
 $images= array();
 foreach ($all_images as $image){
   $caption = '';
@@ -149,61 +123,68 @@ foreach ($all_images as $image){
   }
 
 }
-dpm($images,'imges for grid');
+
 
 print '
-<button onclick="one()">1</button>
-<button onclick="two()">2</button>
-<button onclick="four()">4</button>
+
 
 <script>
+
 // Get the elements with class="column"
-var elements = document.getElementsByClassName("column");
+
 
 // Declare a "loop" variable
 var i;
 
 // Full-width images
-function one() {
+function one(type) {
+    var elements = document.getElementsByClassName(type);
     for (i = 0; i < elements.length; i++) {
-        elements[i].style.flex = "100%"; 
+        elements[i].style.flex = "100%";
     }
 }
 
 // Two images side by side
-function two() {
+function two(type) {
+    var elements = document.getElementsByClassName(type);
     for (i = 0; i < elements.length; i++) {
-        elements[i].style.flex = "40%"; 
+        elements[i].style.flex = "40%";
     }
 }
 
 // Four images side by side
-function four() {
+function four(type) {
+    var elements = document.getElementsByClassName(type);
     for (i = 0; i < elements.length; i++) {
-        elements[i].style.flex = "20%"; 
+        elements[i].style.flex = "20%";
     }
 }
+var btns = document.getElementsByClassName("btn");
+for (var i = 0; i < btns.length; i++) {
+  btns[i].addEventListener("click", function() {
+  var current = document.getElementsByClassName("active");
+  current[0].className = current[0].className.replace(" active", "");
+  this.className += " active";
+});
+ }
 </script>
 ';
 
-
-
 $columns = partition($images,4);
-dpm($columns,'columns');
 print '<div class="row"> ';
-print '  <div class="column">';
+print '  <div class="all_column">';
 print join("\n",$columns[0]);
 print '  </div>';
 
-print '  <div class="column">';
+print '  <div class="all_column">';
 print join("\n",$columns[1]);
 print '  </div>';
 
-print '  <div class="column">';
+print '  <div class="all_column">';
 print join("\n",$columns[2]);
 print '  </div>';
 
-print '  <div class="column">';
+print '  <div class="all_column">';
 print join("\n",$columns[3]);
 print '  </div>';
 print '  </div>';
@@ -226,5 +207,4 @@ print('
 */
 
 print "<p><a href=\"#top\">back to top</a></p><br>";
-
 ?>
