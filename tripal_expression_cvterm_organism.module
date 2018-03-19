@@ -94,6 +94,14 @@ function tripal_expression_cvterm_organism_menu() {
     'type' => MENU_CALLBACK,
     );
 
+   $items['term/pubid/'] = array(
+    'page callback' => 'tripal_expression_cvterm_organism_getTerms_byExp',
+    'access arguments' => array('access content'),
+    'access callback' => true,
+    'type' => MENU_CALLBACK,
+    );
+   
+
    return $items;
  }
  
@@ -109,6 +117,58 @@ function tripal_expression_cvterm_organism_menu() {
    
    return theme('tripal_expression_cvterm_organism',array('results' => $expression_cvterm_organism));  
  }
+
+function tripal_expression_cvterm_organism_getImages_byExp($pub_id){
+   
+   $sql = "SELECT ep.expression_id, i.eimage_id, i.image_uri, i.eimage_type from expression_pub ep, expression_image ei, eimage i,  where ep.expression_id = ei.expression_id and ei.eimage_id = i.eimage_id and pub_id = :pubid";
+   $results = chado_query($sql,array(':pubid' => $pub_id));
+   $images = array();
+   $genes = array();
+   $terms = array();
+   
+   foreach ($results as $r){
+   
+     $images[$r->eimage_id] = 
+       array(
+        'eimage_type' => $r->eimage_type, 
+        'image_uri'=>$r->image_uri, 
+        'expression_id' => $r->expression_id 
+        );
+        
+     
+     $sql_genes = "SELECT o.genus, o.species, o.common_name, f.feature_id, f.uniquename, f.name FROM feature_expression fe, feature f , o.organism WHERE f.feature_id = fe.feature_id AND f.organism_id = o.organism_id AND fe.expression_id = :expression_id";
+     $results_genes = chado_query($sql_genes,array(':expression_id' => $r->expression_id));
+     
+     foreach ($results_genes as $rg){
+       $genes[$rg->feature_id]['expression_id'][] = $r->expression_id; 
+       $genes[$rg->feature_id]['eimage_id'][] = $r->eimage_id; 
+       $genes[$rg->feature_id]['name'] = $rg->name;
+       $genes[$rg->feature_id]['uniquename'] =>$rg->uniquename;
+       $genes[$rg->feature_id]['organism'] => array(
+              'genus'=>$rg->genus, 
+              'species'=>$rg->species, 
+              'common_name'=>$rg->common_name ,
+              'organism_id'=>$rg->organism_id
+            ),
+        );
+     }
+     
+     $sql_terms = "SELECT c.cvterm_id, c.name, c.definition from cvterm c, expression_cvterm ec where ec.cvterm_id = c.cvterm_id and ec.expression_id = :expression_id";
+     $results_terms = chado_query($sql_terms,array(':expression_id' => $r->expression_id));
+  
+     
+    foreach ($results_terms as $rt){
+       $terms[$rt->cvterm_id]['expression_id'][]= $r->expression_id;
+       $terms[$rt->cvterm_id]['eimage_id'][]= $r->eimage_id;
+       $terms[$rt->cvterm_id]['name'] = $rt->name, 
+       $terms[$rt->cvterm_id]['definition'] = $rt->definition, 
+     }
+   }
+   $expression_cvterm_organism_exp = array( 'pub_id' => pub_id  , 'images' => $images , 'genes' => $genes , 'terms' => $terms);
+
+   return theme('tripal_expression_cvterm_organism_experiment',array('results' => $expression_cvterm_organism_exp));
+ }
+ 
 
  function tripal_expression_cvterm_organism_node_info() {
    return array(
@@ -323,7 +383,6 @@ function chado_expression_cvterm_organism_chado_node_sync_select_query($query) {
  */
 function chado_expression_cvterm_organism_insert($node) {
 
-  drupal_set_message("I am here chado_expression_cvterm_insert", 'warning');
   
   $expression_cvterm_organism_id = '';
   $cvterm_id = '';
@@ -378,7 +437,6 @@ function chado_expression_cvterm_organism_insert($node) {
  */
 function chado_expression_cvterm_organism_validate($node, $form, &$form_state) {
 
-  drupal_set_message("I am here: chado_expression_cvterm_validate", 'warning');
   
   // We only want to validate when the node is saved.
   // Since this validate can be called on AJAX and Deletion of the node
@@ -397,7 +455,6 @@ function chado_expression_cvterm_organism_validate($node, $form, &$form_state) {
 
 function chado_expression_cvterm_organism_form($node, &$form_state) {
 
-  drupal_set_message("I am here: chado_expression_cvterm_form", 'warning');
   
   // EXPLANATION: This function should construct a form array that is used by
   // Drupal to construct a form for inserting or editing our new node type.
@@ -434,7 +491,6 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
   // if we are editing an existing node then the 'example' record from Chado
   // is already part of the node, so we set the defaults from that object
  if (property_exists($node, 'expression_cvterm_organism')) {
-    drupal_set_message("Property exists", 'warning');
     $expression_cvterm_organism = $node->expression_cvterm_organism;
     $expression_cvterm_organism_id   = $expression_cvterm_organism->expression_cvterm_organism_id;
     $organism_id   = $expression_cvterm_organism->organism_id->organism_id;
@@ -448,7 +504,6 @@ function chado_expression_cvterm_organism_form($node, &$form_state) {
     );
   }
 else {
-  drupal_set_message("Property does not exists", 'warning');
 
 }
 
@@ -533,7 +588,6 @@ else {
  */
 function chado_expression_cvterm_organism_update($node) {
   
-  drupal_set_message("I am here:chado_expression_cvterm_update", 'warning');
 
 /*
   // be sure to always trim text fields
@@ -547,7 +601,6 @@ function chado_expression_cvterm_organism_update($node) {
   $options = array('return_record' => TRUE);
   $status = chado_update_record('expression_cvterm_organism', $match, $values, $options);
   if (!$status) {
-    drupal_set_message(t('Unable to update example.'), 'warning');
     tripal_report_error('tripal_example', TRIPAL_WARNING, 'Update example: Unable to update example where values: %values',
       array('%values' => print_r($values, TRUE)));
   }
@@ -556,7 +609,6 @@ function chado_expression_cvterm_organism_update($node) {
 
 function chado_expression_cvterm_organism_delete($node) {
 
-  drupal_set_message("I am here: chado_expression_cvterm_delete", 'warning');
 /*
   // get the expression_cvterm id from the node
   $expression_cvterm_organism_id  = chado_get_id_from_nid('expression_cvterm_organism', $node->nid);
@@ -574,7 +626,6 @@ function chado_expression_cvterm_organism_delete($node) {
   // for this expression_cvterm_organism
   chado_query("DELETE FROM {expression_cvterm_organism} WHERE expression_cvterm_organism_id = :expression_cvterm_organism_id", array(':expression_cvterm_organism_id' => $expression_cvterm_organism_id));
   // inform the user that the data was deleted
-  drupal_set_message(t("The expression_cvterm_organism and all associated data were removed from Chado"));
 */
 }
 
@@ -594,7 +645,6 @@ function chado_expression_cvterm_organism_delete($node) {
  */
 function tripal_expression_cvterm_organism_node_access($node, $op, $account) {
 
-  drupal_set_message("i am here tripal_expression_cvterm_node_access", 'warning');
 
 /*
   $node_type = $node;
@@ -647,7 +697,6 @@ function tripal_expression_cvterm_organism_node_access($node, $op, $account) {
  */
 function chado_expression_cvterm_organism_load($nodes) {
 
-  drupal_set_message("I am here: chado_expression_cvterm_load", 'warning');
   // EXPLANATION: when displaying or node or accessing the node in a template
   // we need the data from Chado. This function finds the record in Chado that
   // this node belongs to and adds the record.
@@ -790,7 +839,6 @@ function tripal_expression_cvterm_organism_theme($existing, $type, $theme, $path
       'path' => "$path/theme/templates",
     ),
 
-/*
     'tripal_expression_cvterm_organism_all' => array(
       'variables' => array('node' => NULL),
       'template' => 'tripal_expression_cvterm_organism_all',
@@ -803,15 +851,14 @@ function tripal_expression_cvterm_organism_theme($existing, $type, $theme, $path
     ),
     'tripal_expression_cvterm_organism_byExperiment' => array(
       'variables' => array('node' => NULL),
+      'template' => 'tripal_expression_cvterm_organism_byExperiment',
+      'path' => "$path/theme/templates",
+    ),
+    'tripal_expression_cvterm_organism_byExperimenter' => array(
+      'variables' => array('node' => NULL),
       'template' => 'tripal_expression_cvterm_organism_byExperimenter',
       'path' => "$path/theme/templates",
     ),
-    'tripal_expression_cvterm_organism_byAuthor' => array(
-      'variables' => array('node' => NULL),
-      'template' => 'tripal_expression_cvterm_organism_byAuthor',
-      'path' => "$path/theme/templates",
-    ),
-*/
     // the help template
     'tripal_expression_cvterm_organism_help' => array(
       'template' => 'tripal_expression_cvterm_organism_help',
@@ -878,27 +925,31 @@ function tripal_expression_cvterm_organism_node_view($node, $view_mode, $langcod
           '#node' => $node,
           '#tripal_toc_id'    =>'all',
           '#tripal_toc_title' => 'All Images',
+          '#weight' => -90,
         );
 
-/*
         $node->content['tripal_expression_cvterm_organism_byGene'] = array(
           '#theme' => 'tripal_expression_cvterm_organism_byGene',
           '#node' => $node,
           '#tripal_toc_id'    => 'byGene',
           '#tripal_toc_title' => 'Images By Gene',
+          '#weight' => -80,
         );
         $node->content['tripal_expression_cvterm_organism_byExperiment'] = array(
           '#theme' => 'tripal_expression_cvterm_organism_byExperiment',
           '#node' => $node,
           '#tripal_toc_id'    => 'byExperiment',
           '#tripal_toc_title' => 'Images By Experiment',
+          '#weight' => -70,
         );
         $node->content['tripal_expression_cvterm_organism_byExperimenter'] = array(
           '#theme' => 'tripal_expression_cvterm_organism_byExperimenter',
           '#node' => $node,
           '#tripal_toc_id'    => 'byExperimenter',
           '#tripal_toc_title' => 'Images By Experimenter',
+          '#weight' => -60,
         );
+/*
         $node->content['tripal_expression_cvterm_organism_byAuthor'] = array(
           '#theme' => 'tripal_expression_cvterm_organism_byAuthor',
           '#node' => $node,
