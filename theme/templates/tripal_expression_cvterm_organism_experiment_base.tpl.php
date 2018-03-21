@@ -462,7 +462,8 @@ if ($id == 'experiment_overview'){
   print $content;
 }elseif($id == 'experiment_all')
 {
-  print "hi";
+  $content = tripal_expression_cvterm_organism_getExperiment_all($results,$image_count,$image_dir);
+  print $content;
 }
 
 
