@@ -242,7 +242,7 @@ function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_
 		$images[] = "<div class=\"caption_container\"><a href=\"$image_dir/$uri\"><img style=\"width:100%\" class=\"caption_image\" src=\"$image_dir/$uri\" ></a><div class=\"caption_middle\"><div class=\"caption_text\">$caption</div></div></div>";
 	 }
 	 $each_image_count = count($images);
-	 $wordcloud_array[]="{\"text\":\"$name\",\"size\":$each_$image_count}";
+	 $wordcloud_array[]="{\"text\":\"$name\",\"size\":$each_image_count}";
 	 $columns = partition($images,4);
 	 $content .= '
 	 <fieldset class=" collapsible collapsed">
