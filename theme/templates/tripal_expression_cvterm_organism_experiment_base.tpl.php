@@ -373,7 +373,7 @@ if ($id == 'experiment_overview'){
   print $content;
 
 }elseif($id == 'experiment_byTerm'){
-  $content = tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_count,$term_count)
+  $content = tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_count,$term_count);
   print $content;
 }elseif($id == 'experiment_all')
 {
