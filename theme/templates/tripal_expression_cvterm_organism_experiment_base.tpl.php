@@ -21,6 +21,74 @@ function partition( $list, $p ) {
     return $partition;
 }
 
+function tripal_expression_cvterm_organism_getExperiment_overview($results){
+$rows = array();
+$headers = array();
+$rows[] = array(
+  array(
+    'data' => 'Experiment Name',
+    'header' => TRUE
+  ),
+  $results['pub']['title']
+);
+$rows[] = array(
+  array(
+    'data' => 'Experimenter',
+    'header' => TRUE
+  ),
+  $results['pub']['author']
+);
+$rows[] = array(
+  array(
+    'data' => 'Series Title',
+    'header' => TRUE
+  ),
+  $results['pub']['volumetitle']
+);
+$rows[] = array(
+  array(
+    'data' => 'Volume',
+    'header' => TRUE
+  ),
+  $results['pub']['volume']
+);
+$rows[] = array(
+  array(
+    'data' => 'Year',
+    'header' => TRUE
+  ),
+  $results['pub']['year']
+);
+$rows[] = array(
+  array(
+    'data' => 'Pages',
+    'header' => TRUE
+  ),
+  $results['pub']['pages']
+);
+$table = array(
+  'header' => $headers,
+  'rows' => $rows,
+  'attributes' => array(
+    'id' => 'tripal_expression_cvterm_organism-table-base',
+    'class' => 'tripal-data-table'
+  ),
+  'sticky' => FALSE,
+  'caption' => '',
+  'colgroups' => array(),
+  'empty' => '',
+);
+// once we have our table array structure defined, we call Drupal's
+// theme_table() function to generate the table.
+$table_content = theme_table($table);
+
+$content = "<H2>Something</H2>
+$table_content
+";
+return $content; 
+
+}
+
 $columns_script = <<<EOD
 <script>
 
@@ -135,70 +203,8 @@ print"
 ";
 
 if ($id == 'experiment_overview'){
-$rows = array();
-$headers = array();
-$rows[] = array(
-  array(
-    'data' => 'Experiment Name',
-    'header' => TRUE
-  ),
-  $results['pub']['title']
-);
-$rows[] = array(
-  array(
-    'data' => 'Experimenter',
-    'header' => TRUE
-  ),
-  $results['pub']['author']
-);
-$rows[] = array(
-  array(
-    'data' => 'Series Title',
-    'header' => TRUE
-  ),
-  $results['pub']['volumetitle']
-);
-$rows[] = array(
-  array(
-    'data' => 'Volume',
-    'header' => TRUE
-  ),
-  $results['pub']['volume']
-);
-$rows[] = array(
-  array(
-    'data' => 'Year',
-    'header' => TRUE
-  ),
-  $results['pub']['year']
-);
-$rows[] = array(
-  array(
-    'data' => 'Pages',
-    'header' => TRUE
-  ),
-  $results['pub']['pages']
-);
-$table = array(
-  'header' => $headers,
-  'rows' => $rows,
-  'attributes' => array(
-    'id' => 'tripal_expression_cvterm_organism-table-base',
-    'class' => 'tripal-data-table'
-  ),
-  'sticky' => FALSE,
-  'caption' => '',
-  'colgroups' => array(),
-  'empty' => '',
-);
-// once we have our table array structure defined, we call Drupal's
-// theme_table() function to generate the table.
-$table_content = theme_table($table);
-
-$content = "<H2>Something</H2>
-$table_content
-";
-print $content;            
+  $content = tripal_expression_cvterm_organism_getExperiment_overview($results);
+  print $content;           
 }elseif($id == 'experiment_byGene'){
 
 
