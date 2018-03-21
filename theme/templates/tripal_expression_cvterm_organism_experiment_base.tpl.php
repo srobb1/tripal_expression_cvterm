@@ -62,7 +62,7 @@ for (var i = 0; i < btns.length; i++) {
 });
  }
 </script>
-EOD
+EOD;
 
 
 $script = <<<EOD
