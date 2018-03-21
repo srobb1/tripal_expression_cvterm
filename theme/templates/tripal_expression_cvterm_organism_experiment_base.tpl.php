@@ -259,7 +259,7 @@ function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_
 	return $content;
 }
 
-function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_count,$term_count){
+function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_count,$term_count,$image_dir){
 	$content =  ' <a class="waves-effect waves-light btn" onClick="expandAll();">Expand All</a> 
 	  <a class="waves-effect waves-light btn" onClick="collapseAll();">Collapse All</a>
 	<br /><br />';
@@ -312,7 +312,7 @@ function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_
 	 $columns = partition($images,4);
 	 $content .= '
 	 <fieldset class=" collapsible collapsed">
-	 <legend><span class="fieldset-legend">' . $name . " [" . $uniquename . "] ($each_image_count)" . '</span></legend>
+	 <legend><span class="fieldset-legend">' . $name . ": " . $definition . " ($each_image_count)" . '</span></legend>
 	 <div class="fieldset-wrapper"> ' ;
 
 	 $content .= '<div class="row"> ';
