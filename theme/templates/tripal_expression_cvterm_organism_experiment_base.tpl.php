@@ -178,7 +178,7 @@ function tripal_expression_cvterm_organism_getExperiment_overview($results){
 	return $content; 
 
 }
-function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_count,$gene_count){
+function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_count,$gene_count,$image_dir){
 	$content =  ' <a class="waves-effect waves-light btn" onClick="expandAll();">Expand All</a> 
 	  <a class="waves-effect waves-light btn" onClick="collapseAll();">Collapse All</a>
 	<br /><br />';
