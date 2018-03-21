@@ -112,13 +112,13 @@ function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_
 	';
 
 
-	foreach ($results['genes'] as $feature){
-	  $name = $feature['name'];
-	  $uniquename = $feature['uniquename'];
+	foreach ($results['genes'] as $item){
+	  $name = $item['name'];
+	  $uniquename = $item['uniquename'];
 
 	  $images = array();
 
-	 foreach ($feature['eimage_id'] as $eimage_id){
+	 foreach ($item['eimage_id'] as $eimage_id){
 		$uri = $results['images'][$eimage_id]['image_uri'];
 		$expression_id = $results['images'][$eimage_id]['expression_id'];
 		$terms_id_array = $results['expressions'][$expression_id]['cvterm_id'];
@@ -194,7 +194,7 @@ function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_
 
 
 	foreach ($results['terms'] as $item){
-	  $name = $feature['name'];
+	  $name = $item['name'];
 	  $def = $item['definition'];
 
 	  $images = array();
