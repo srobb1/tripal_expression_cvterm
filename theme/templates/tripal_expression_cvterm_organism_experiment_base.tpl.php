@@ -315,7 +315,7 @@ function draw(words) {
 EOD;
     $content .= $wordcloud;
 
-	return array $content;
+	return  $content;
 }
 
 function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_count,$term_count,$image_dir){
