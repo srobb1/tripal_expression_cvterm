@@ -340,6 +340,85 @@ function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_
 	return $content;
 }
 
+function tripal_expression_cvterm_organism_getExperiment_all($results,$image_count,$gene_count,$image_dir){
+	$content =  ' <a class="waves-effect waves-light btn" onClick="expandAll();">Expand All</a> 
+	  <a class="waves-effect waves-light btn" onClick="collapseAll();">Collapse All</a>
+	<br /><br />';
+	$content .= "
+	<p><a name=\"top\"></a></p>
+	<h1>All images from the Experiemnt:<strong>$exp_title</strong> are displayed below.</h1>
+	<br><hr>
+	";
+
+	//$content .= $columns_script;
+
+
+	$content .= "<h2> Images($image_count)</h2>";
+	$content .= '
+	  <p>Click on the buttons to change the grid view.</p>
+	  <button class="btn" onclick="one(\'gene_column\')">1</button>
+	  <button class="btn active" onclick="two(\'gene_column\')">2</button>
+	  <button class="btn" onclick="four(\'gene_column\')">4</button>
+	<br><br>
+	';
+
+
+	
+
+
+	$images = array();
+
+	 foreach ($results['images'] as $eimage){
+		$uri = $eimage['image_uri'];
+		$expression_id = $eimage['expression_id'];
+		$terms_id_array = $results['expressions'][$expression_id]['cvterm_id'];
+		$terms_array = array();
+		foreach ($terms_id_array as $term_id){
+		  $terms_array[] = $results['terms'][$term_id]['name'];
+		}
+		$terms = "All terms tagged in this image: " . join(', ', $terms_array);
+		$all_genes_array = array();
+		foreach($results['expressions'][$expression_id]['feature_id'] as $other_feature){
+		  $other_gene_name = $results['genes'][$other_feature]['name'];
+		  $other_gene_uniquename = $results['genes'][$other_feature]['uniquename'];
+		  $all_genes_array[] = "$other_gene_name ($other_gene_uniquename)";
+		}
+		$all_genes = "All genes tagged in this image: " . join(', ', $all_genes_array);
+		$caption = "$all_genes<br>$terms";
+		$caption .=  "<br>". $results['expressions'][$expression_id]['description'];
+		$images[] = "<div class=\"caption_container\"><a href=\"$image_dir/$uri\"><img style=\"width:100%\" class=\"caption_image\" src=\"$image_dir/$uri\" ></a><div class=\"caption_middle\"><div class=\"caption_text\">$caption</div></div></div>";
+	 }
+	 $each_image_count = count($images);
+	 $columns = partition($images,4);
+	 $content .= '
+	 <fieldset class=" collapsible collapsed">
+	 <legend><span class="fieldset-legend"> All Images' .  "($each_image_count)" . '</span></legend>
+	 <div class="fieldset-wrapper"> ' ;
+
+	 $content .= '<div class="row"> ';
+	 $content .= '  <div class="gene_column">';
+     $content .= join("\n",$columns[0]);
+	 $content .= '  </div>';
+
+	 $content .= '  <div class="gene_column">';
+	 $content .= join("\n",$columns[1]);
+	 $content .= '  </div>';
+
+     $content .= '  <div class="gene_column">';
+     $content .= join("\n",$columns[2]);
+     $content .= '  </div>';
+
+     $content .= '  <div class="gene_column">';
+	 $content .= join("\n",$columns[3]);
+	 $content .= '  </div>';
+	 $content .= '  </div>';
+	 $content .= '</div>
+	 </fieldset>';
+	
+
+	$content .= "<p><a href=\"#top\">back to top</a></p><br>";
+	return $content;
+}
 
 
 
