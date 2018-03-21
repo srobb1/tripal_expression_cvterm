@@ -1,4 +1,6 @@
 <?php
+dpm($node,'node-base');
+dpm($results,'result-base');
 $cvterm_name = $node->expression_cvterm_organism->cvterm_id->name;
 $cvterm_def = $node->expression_cvterm_organism->cvterm_id->definition;
 $cv_name = ucwords(str_replace("_", " ", $node->expression_cvterm_organism->cv_id->name));

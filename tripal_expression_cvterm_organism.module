@@ -87,16 +87,18 @@ function tripal_expression_cvterm_organism_menu() {
      'weight' => 0
    );
 
-   $items['term/'] = array(
+   $items['term/pub/%'] = array(
     'page callback' => 'tripal_expression_cvterm_organism_getInfo',
     'access arguments' => array('access content'),
+    'page arguments' => array(1,2),
     'access callback' => true,
     'type' => MENU_CALLBACK,
     );
 
-   $items['term/pubid/'] = array(
-    'page callback' => 'tripal_expression_cvterm_organism_getTerms_byExp',
+   $items['term_by_exp/%'] = array(
+    'page callback' => 'tripal_expression_cvterm_organism_getImages_byExp',
     'access arguments' => array('access content'),
+    'page arguments' => array(1),
     'access callback' => true,
     'type' => MENU_CALLBACK,
     );
@@ -106,6 +108,7 @@ function tripal_expression_cvterm_organism_menu() {
  }
  
  function tripal_expression_cvterm_organism_getInfo($genus,$species,$term){
+drupal_set_message("here",'warning');
    $expression_cvterm_organism = array( 'genus' => $genus , 'species' => $species , 'term' => $term );
    // put data into $expression_cvterm_organism for the page
    // title
@@ -114,62 +117,104 @@ function tripal_expression_cvterm_organism_menu() {
    // genes that reference this term
    // experiements of the images, and the corresponding images
    // authors of the exeperiments, and all their corresponding images
-   
-   return theme('tripal_expression_cvterm_organism',array('results' => $expression_cvterm_organism));  
- }
+dpm($expression_cvterm_organism);
+   if($genus == 'pub'){
+     $expression_cvterm_organism['pub']['pub_id']=$species;
+//     tripal_expression_cvterm_organism_getImages_byExp($term);
+   }else{
+     $expression_cvterm_organism['pub']['pub_id']=0;
+   }
+     return theme('tripal_expression_cvterm_organism_base',array('results' => $expression_cvterm_organism));  
+  }
 
 function tripal_expression_cvterm_organism_getImages_byExp($pub_id){
-   
-   $sql = "SELECT ep.expression_id, i.eimage_id, i.image_uri, i.eimage_type from expression_pub ep, expression_image ei, eimage i,  where ep.expression_id = ei.expression_id and ei.eimage_id = i.eimage_id and pub_id = :pubid";
-   $results = chado_query($sql,array(':pubid' => $pub_id));
-   $images = array();
-   $genes = array();
-   $terms = array();
-   
-   foreach ($results as $r){
-   
-     $images[$r->eimage_id] = 
-       array(
-        'eimage_type' => $r->eimage_type, 
-        'image_uri'=>$r->image_uri, 
-        'expression_id' => $r->expression_id 
-        );
-        
-     
-     $sql_genes = "SELECT o.genus, o.species, o.common_name, f.feature_id, f.uniquename, f.name FROM feature_expression fe, feature f , o.organism WHERE f.feature_id = fe.feature_id AND f.organism_id = o.organism_id AND fe.expression_id = :expression_id";
-     $results_genes = chado_query($sql_genes,array(':expression_id' => $r->expression_id));
-     
-     foreach ($results_genes as $rg){
-       $genes[$rg->feature_id]['expression_id'][] = $r->expression_id; 
-       $genes[$rg->feature_id]['eimage_id'][] = $r->eimage_id; 
-       $genes[$rg->feature_id]['name'] = $rg->name;
-       $genes[$rg->feature_id]['uniquename'] =>$rg->uniquename;
-       $genes[$rg->feature_id]['organism'] => array(
-              'genus'=>$rg->genus, 
-              'species'=>$rg->species, 
-              'common_name'=>$rg->common_name ,
-              'organism_id'=>$rg->organism_id
-            ),
-        );
-     }
-     
-     $sql_terms = "SELECT c.cvterm_id, c.name, c.definition from cvterm c, expression_cvterm ec where ec.cvterm_id = c.cvterm_id and ec.expression_id = :expression_id";
-     $results_terms = chado_query($sql_terms,array(':expression_id' => $r->expression_id));
+drupal_set_message("getImages_byExp",'warning');
+  $pub_title = '';
+  $pub_author = '';
+  $pub_year = '';
+  $pub_pages = '';
+  $pub_volume = '';
+  $pub_volumetitle = '';
+  $sql_pub = "SELECT p.series_name, p.title, p.pages, p.pyear, p.volume, pp.value as author FROM {pub} p , {pubprop} pp , {cvterm} c WHERE p.pub_id = pp.pub_id and pp.type_id = c.cvterm_id and c.name = 'Author' and p.pub_id = :pubid";  
+  $results_pub = chado_query($sql_pub,array(':pubid' => $pub_id));
+  foreach ($results_pub as $rp){
+    $pub_title = $rp->title;
+    $pub_author = $rp->author;
+    $pub_year = $rp->pyear;
+    $pub_pages = $rp->pages;
+    $pub_volume = $rp->volume;
+    $pub_volumetitle = $rp->series_name;
+    break;
+  }
+
+  drupal_set_title($pub_title);
+
+  $sql = "SELECT ep.expression_id, i.eimage_id, i.image_uri, i.eimage_type from {expression_pub} ep, {expression_image} ei, {eimage} i where ep.expression_id = ei.expression_id and ei.eimage_id = i.eimage_id and i.eimage_type not like '%m4v%' and i.eimage_type not like '%mv4%' and i.image_uri not like '%Panel%' and ep.pub_id = :pubid";
+  $results = chado_query($sql,array(':pubid' => $pub_id));
+  $images = array();
+  $genes = array();
+  $terms = array();
+  $expression_ids = array();
+  $toc = array('experiment_overview' => 'Experiment Overview' , 'experiment_all' => 'All Images from Exp' , 'experiment_byGene' => 'Images by Gene' , 'experiment_byTerm' => 'Images by Term');
   
+  foreach ($results as $r){
+    $images[$r->eimage_id] = 
+      array(
+       'eimage_type' => $r->eimage_type, 
+       'image_uri'=>$r->image_uri, 
+       'expression_id' => $r->expression_id 
+       );
+    $expression_ids[$r->expression_id]['eimage_id'][] = $r->eimage_id;
+
+    $sql_genes = "SELECT o.genus, o.species, o.common_name, f.feature_id, f.uniquename, f.name FROM {feature_expression} fe, {feature} f , {organism} o  WHERE f.feature_id = fe.feature_id AND f.organism_id = o.organism_id AND fe.expression_id = :expression_id";
+    $results_genes = chado_query($sql_genes,array(':expression_id' => $r->expression_id));
      
-    foreach ($results_terms as $rt){
-       $terms[$rt->cvterm_id]['expression_id'][]= $r->expression_id;
-       $terms[$rt->cvterm_id]['eimage_id'][]= $r->eimage_id;
-       $terms[$rt->cvterm_id]['name'] = $rt->name, 
-       $terms[$rt->cvterm_id]['definition'] = $rt->definition, 
-     }
-   }
-   $expression_cvterm_organism_exp = array( 'pub_id' => pub_id  , 'images' => $images , 'genes' => $genes , 'terms' => $terms);
-
-   return theme('tripal_expression_cvterm_organism_experiment',array('results' => $expression_cvterm_organism_exp));
- }
+    foreach ($results_genes as $rg){
+      $genes[$rg->feature_id]['expression_id'][] = $r->expression_id; 
+      $genes[$rg->feature_id]['eimage_id'][] = $r->eimage_id; 
+      $genes[$rg->feature_id]['name'] = $rg->name;
+      $genes[$rg->feature_id]['uniquename'] = $rg->uniquename;
+      $genes[$rg->feature_id]['organism'] = array(
+             'genus'=>$rg->genus, 
+             'species'=>$rg->species, 
+             'common_name'=>$rg->common_name ,
+             'organism_id'=>$rg->organism_id
+           );
+      $expression_ids[$r->expression_id]['feature_id'][] = $rg->feature_id;
+    }
+     
+    $sql_terms = "SELECT c.cvterm_id, c.name, c.definition from {cvterm} c, {expression_cvterm} ec where ec.cvterm_id = c.cvterm_id and ec.expression_id = :expression_id";
+    $results_terms = chado_query($sql_terms,array(':expression_id' => $r->expression_id));
  
+    foreach ($results_terms as $rt){
+      $terms[$rt->cvterm_id]['expression_id'][]= $r->expression_id;
+      $terms[$rt->cvterm_id]['eimage_id'][]= $r->eimage_id;
+      $terms[$rt->cvterm_id]['name'] = $rt->name; 
+      $terms[$rt->cvterm_id]['definition'] = $rt->definition;
+      $expression_ids[$r->expression_id]['cvterm_id'][] = $rt->cvterm_id;
+    }
+  
+     $sql_expressions = "SELECT description from {expression} where expression_id = :expression_id";
+     $results_expressions = chado_query($sql_expressions,array(':expression_id' => $r->expression_id));
 
+     foreach ($results_expressions as $re){
+       $expression_ids[$r->expression_id]['description']=$re->description;
+     }
+
+  }
+  $pub = array(
+      'title' => $pub_title,
+      'year' => $pub_year,
+      'volume' => $pub_volume,
+      'volumetitle' => $pub_volumetitle,
+      'author' => $pub_author,
+      'pages' => $pub_pages,
+      'pub_id' => $pub_id
+
+   );
+  $expression_cvterm_organism_exp = array( 'toc' => $toc , 'pub' => $pub  , 'images' => $images , 'genes' => $genes , 'terms' => $terms , 'expressions' => $expression_ids);
+  return theme('tripal_expression_cvterm_organism_experiment_base',array('results' => $expression_cvterm_organism_exp, 'node' => $node));
+}
  function tripal_expression_cvterm_organism_node_info() {
    return array(
      'chado_expression_cvterm_organism' => array(
@@ -859,6 +904,11 @@ function tripal_expression_cvterm_organism_theme($existing, $type, $theme, $path
       'template' => 'tripal_expression_cvterm_organism_byExperimenter',
       'path' => "$path/theme/templates",
     ),
+    'tripal_expression_cvterm_organism_experiment_base' => array(
+      'variables' => array('node' => $node),
+      'template' => 'tripal_expression_cvterm_organism_experiment_base',
+      'path' => "$path/theme/templates",
+    ),
     // the help template
     'tripal_expression_cvterm_organism_help' => array(
       'template' => 'tripal_expression_cvterm_organism_help',
@@ -885,6 +935,7 @@ function tripal_expression_cvterm_organism_theme($existing, $type, $theme, $path
 
 
 function tripal_expression_cvterm_organism_node_view($node, $view_mode, $langcode) {
+dpm($node,'node');
   // EXPLANATION: This function defines the content "blocks" that appear when
   // the node is displayed. It is node type agnostic so we can add content to
   // any node type. So, we use this function to add the content from all of our
@@ -920,6 +971,15 @@ function tripal_expression_cvterm_organism_node_view($node, $view_mode, $langcod
           '#tripal_toc_title' => 'Overview',
           '#weight' => -100,
         );
+/*
+        $node->content['tripal_expression_cvterm_organism_experiment_base'] = array(
+          '#theme' => 'tripal_expression_cvterm_organism_experiment_base',
+          '#node' => $node,
+          '#tripal_toc_id'    => 'experiment_base',
+          '#tripal_toc_title' => 'Experiment Overview',
+          '#weight' => -100,
+        );
+*/
         $node->content['tripal_expression_cvterm_organism_all'] = array(
           '#theme' => 'tripal_expression_cvterm_organism_all',
           '#node' => $node,
@@ -994,9 +1054,31 @@ function tripal_expression_cvterm_organism_node_view($node, $view_mode, $langcod
         );
       }
       break;
+    case 'tripal_expression_cvterm_organism_experiment':
+ if ($view_mode == 'full') {
+        $node->content['#tripal_generic_node_template'] = TRUE;
+        $node->content['tripal_expression_cvterm_organism_experiment_base'] = array(
+          '#theme' => 'tripal_expression_cvterm_organism_experiment_base',
+          '#node' => $node,
+          '#tripal_toc_id'    => 'experiment_base',
+          '#tripal_toc_title' => 'EXP Overview',
+          '#weight' => -100,
+        );
+/*
+        $node->content['tripal_expression_cvterm_organism_experiment_all'] = array(
+          '#theme' => 'tripal_expression_cvterm_organism_experiment_all',
+          '#node' => $node,
+          '#tripal_toc_id'    =>'experiment_all',
+          '#tripal_toc_title' => 'All Images',
+          '#weight' => -90,
+        );
+*/
   }
+  break;
+     break;
     // you can add custom content to any node type by adding content to the node
     // in the same way as above.
     // ... etc
+  }
 }
 
