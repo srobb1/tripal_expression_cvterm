@@ -2,7 +2,7 @@
 dpm($results,'results');
 
 drupal_add_library('system', 'drupal.collapse');
-$image_dir = '/pub/analysis/wish/image/';
+$image_dir = '/pub/analysis/wish/image';
 $image_count = count($results['images']);
 $gene_count = count($results['genes']);
 $exp_title = $results['pub']['title'];
@@ -22,71 +22,151 @@ function partition( $list, $p ) {
 }
 
 function tripal_expression_cvterm_organism_getExperiment_overview($results){
-$rows = array();
-$headers = array();
-$rows[] = array(
-  array(
-    'data' => 'Experiment Name',
-    'header' => TRUE
-  ),
-  $results['pub']['title']
-);
-$rows[] = array(
-  array(
-    'data' => 'Experimenter',
-    'header' => TRUE
-  ),
-  $results['pub']['author']
-);
-$rows[] = array(
-  array(
-    'data' => 'Series Title',
-    'header' => TRUE
-  ),
-  $results['pub']['volumetitle']
-);
-$rows[] = array(
-  array(
-    'data' => 'Volume',
-    'header' => TRUE
-  ),
-  $results['pub']['volume']
-);
-$rows[] = array(
-  array(
-    'data' => 'Year',
-    'header' => TRUE
-  ),
-  $results['pub']['year']
-);
-$rows[] = array(
-  array(
-    'data' => 'Pages',
-    'header' => TRUE
-  ),
-  $results['pub']['pages']
-);
-$table = array(
-  'header' => $headers,
-  'rows' => $rows,
-  'attributes' => array(
-    'id' => 'tripal_expression_cvterm_organism-table-base',
-    'class' => 'tripal-data-table'
-  ),
-  'sticky' => FALSE,
-  'caption' => '',
-  'colgroups' => array(),
-  'empty' => '',
-);
-// once we have our table array structure defined, we call Drupal's
-// theme_table() function to generate the table.
-$table_content = theme_table($table);
+	$rows = array();
+	$headers = array();
+	$rows[] = array(
+	  array(
+		'data' => 'Experiment Name',
+		'header' => TRUE
+	  ),
+	  $results['pub']['title']
+	);
+	$rows[] = array(
+	  array(
+		'data' => 'Experimenter',
+		'header' => TRUE
+	  ),
+	  $results['pub']['author']
+	);
+	$rows[] = array(
+	  array(
+		'data' => 'Series Title',
+		'header' => TRUE
+	  ),
+	  $results['pub']['volumetitle']
+	);
+	$rows[] = array(
+	  array(
+		'data' => 'Volume',
+		'header' => TRUE
+	  ),
+	  $results['pub']['volume']
+	);
+	$rows[] = array(
+	  array(
+		'data' => 'Year',
+		'header' => TRUE
+	  ),
+	  $results['pub']['year']
+	);
+	$rows[] = array(
+	  array(
+		'data' => 'Pages',
+		'header' => TRUE
+	  ),
+	  $results['pub']['pages']
+	);
+	$table = array(
+	  'header' => $headers,
+	  'rows' => $rows,
+	  'attributes' => array(
+		'id' => 'tripal_expression_cvterm_organism-table-base',
+		'class' => 'tripal-data-table'
+	  ),
+	  'sticky' => FALSE,
+	  'caption' => '',
+	  'colgroups' => array(),
+	  'empty' => '',
+	);
+	// once we have our table array structure defined, we call Drupal's
+	// theme_table() function to generate the table.
+	$table_content = theme_table($table);
 
-$content = "<H2>Something</H2>
-$table_content
-";
-return $content; 
+	$content = "<H2>Something</H2>
+	$table_content
+	";
+	return $content; 
 
+}
+function tripal_expression_cvterm_organism_getExperiment_byGene($results){
+	$content =  ' <a class="waves-effect waves-light btn" onClick="expandAll();">Expand All</a> 
+	  <a class="waves-effect waves-light btn" onClick="collapseAll();">Collapse All</a>
+	<br /><br />';
+	$content .= "
+	<p><a name=\"top\"></a></p>
+	<h1>All images from the Experiemnt:<strong>$exp_title</strong> are subdivided by Gene and are displayed below.</h1>
+	<br><hr>
+	";
+
+	$content .= $columns_script;
+
+
+	$content .= "<h2> Images($image_count) By Gene($gene_count)</h2>";
+	$content .= '
+	  <p>Click on the buttons to change the grid view.</p>
+	  <button class="btn" onclick="one(\'gene_column\')">1</button>
+	  <button class="btn active" onclick="two(\'gene_column\')">2</button>
+	  <button class="btn" onclick="four(\'gene_column\')">4</button>
+	<br><br>
+	';
+
+
+	foreach ($results['genes'] as $feature){
+	  $name = $feature['name'];
+	  $uniquename = $feature['uniquename'];
+
+	  $images = array();
+
+	 foreach ($feature['eimage_id'] as $eimage_id){
+		$uri = $results['images'][$eimage_id]['image_uri'];
+		$expression_id = $results['images'][$eimage_id]['expression_id'];
+		$terms_id_array = $results['expressions'][$expression_id]['cvterm_id'];
+		$terms_array = array();
+		foreach ($terms_id_array as $term_id){
+		  $terms_array[] = $results['terms'][$term_id]['name'];
+		}
+		$terms = "All terms tagged in this image: " . join(', ', $terms_array);
+		$all_genes_array = array();
+		foreach($results['expressions'][$expression_id]['feature_id'] as $other_feature){
+		  $other_gene_name = $results['genes'][$other_feature]['name'];
+		  $other_gene_uniquename = $results['genes'][$other_feature]['uniquename'];
+		  $all_genes_array[] = "$other_gene_name ($other_gene_uniquename)";
+		}
+		$all_genes = "All genes tagged in this image: " . join(', ', $all_genes_array);
+		$caption = "$all_genes<br>$terms";
+		$caption .=  "<br>". $results['expressions'][$expression_id]['description'];
+		$images[] = "<div class=\"caption_container\"><a href=\"$image_dir/$uri\"><img style=\"width:100%\" class=\"caption_image\" src=\"$image_dir/$uri\" ></a><div class=\"caption_middle\"><div class=\"caption_text\">$caption</div></div></div>";
+	 }
+	 $each_image_count = count($images);
+	 $columns = partition($images,4);
+	 $content .= '
+	 <fieldset class=" collapsible collapsed">
+	 <legend><span class="fieldset-legend">' . $name . " [" . $uniquename . "] ($each_image_count)" . '</span></legend>
+	 <div class="fieldset-wrapper"> ' ;
+
+	 $content .= '<div class="row"> ';
+	 $content .= '  <div class="gene_column">';
+     $content .= join("\n",$columns[0]);
+	 $content .= '  </div>';
+
+	 $content .= '  <div class="gene_column">';
+	 $content .= join("\n",$columns[1]);
+	 $content .= '  </div>';
+
+     $content .= '  <div class="gene_column">';
+     $content .= join("\n",$columns[2]);
+     $content .= '  </div>';
+
+     $content .= '  <div class="gene_column">';
+	 $content .= join("\n",$columns[3]);
+	 $content .= '  </div>';
+	 $content .= '  </div>';
+	 $content .= '</div>
+	 </fieldset>';
+	}
+
+	$content .= "<p><a href=\"#top\">back to top</a></p><br>";
+	return $content;
 }
 
 $columns_script = <<<EOD
@@ -206,86 +286,8 @@ if ($id == 'experiment_overview'){
   $content = tripal_expression_cvterm_organism_getExperiment_overview($results);
   print $content;           
 }elseif($id == 'experiment_byGene'){
-
-
-$content =  ' <a class="waves-effect waves-light btn" onClick="expandAll();">Expand All</a> 
-  <a class="waves-effect waves-light btn" onClick="collapseAll();">Collapse All</a>
-<br /><br />';
-$content .= "
-<p><a name=\"top\"></a></p>
-<h1>All images from the Experiemnt:<strong>$exp_title</strong> are subdivided by Gene and are displayed below.</h1>
-<br><hr>
-";
-
-$content .= $columns_script;
-
-
-$content .= "<h2> Images($image_count) By Gene($gene_count)</h2>";
-$content .= '
-  <p>Click on the buttons to change the grid view.</p>
-  <button class="btn" onclick="one(\'gene_column\')">1</button>
-  <button class="btn active" onclick="two(\'gene_column\')">2</button>
-  <button class="btn" onclick="four(\'gene_column\')">4</button>
-<br><br>
-';
-
-
-foreach ($results['genes'] as $feature){
-  $name = $feature['name'];
-  $uniquename = $feature['uniquename'];
-
-  $images = array();
-
- foreach ($feature['eimage_id'] as $eimage_id){
-    $uri = $results['images'][$eimage_id]['image_uri'];
-    $expression_id = $results['images'][$eimage_id]['expression_id'];
-    $terms_id_array = $results['expressions'][$expression_id]['cvterm_id'];
-    $terms_array = array();
-    foreach ($terms_id_array as $term_id){
-      $terms_array[] = $results['terms'][$term_id]['name'];
-    }
-    $terms = "All terms tagged in this image: " . join(', ', $terms_array);
-    $all_genes_array = array();
-    foreach($results['expressions'][$expression_id]['feature_id'] as $other_feature){
-      $other_gene_name = $results['genes'][$other_feature]['name'];
-      $other_gene_uniquename = $results['genes'][$other_feature]['uniquename'];
-      $all_genes_array[] = "$other_gene_name ($other_gene_uniquename)";
-    }
-    $all_genes = "All genes tagged in this image: " . join(', ', $all_genes_array);
-    $caption = "$all_genes<br>$terms";
-    $caption .=  "<br>". $results['expressions'][$expression_id]['description'];
-    $images[] = "<div class=\"caption_container\"><a href=\"$image_dir/$uri\"><img style=\"width:100%\" class=\"caption_image\" src=\"$image_dir/$uri\" ></a><div class=\"caption_middle\"><div class=\"caption_text\">$caption</div></div></div>";
- }
- $each_image_count = count($images);
-  $columns = partition($images,4);
-  $content .= '
-  <fieldset class=" collapsible collapsed">
-  <legend><span class="fieldset-legend">' . $name . " [" . $uniquename . "] ($each_image_count)" . '</span></legend>
-  <div class="fieldset-wrapper"> ' ;
-
-  $content .= '<div class="row"> ';
-  $content .= '  <div class="gene_column">';
-  $content .= join("\n",$columns[0]);
-  $content .= '  </div>';
-
-  $content .= '  <div class="gene_column">';
-  $content .= join("\n",$columns[1]);
-  $content .= '  </div>';
-
-  $content .= '  <div class="gene_column">';
-  $content .= join("\n",$columns[2]);
-  $content .= '  </div>';
-
-  $content .= '  <div class="gene_column">';
-  $content .= join("\n",$columns[3]);
-  $content .= '  </div>';
-  $content .= '  </div>';
-  $content .= '</div>
-  </fieldset>';
-}
-
-$content .= "<p><a href=\"#top\">back to top</a></p><br>";
-print $content;
+  $content = tripal_expression_cvterm_organism_getExperiment_byGene($results);
+  print $content;
 
 
 }elseif($id == 'experiment_byTerm'){
