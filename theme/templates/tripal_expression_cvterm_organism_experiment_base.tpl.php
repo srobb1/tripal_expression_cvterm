@@ -1,6 +1,12 @@
 <?php
 dpm($results,'results');
 
+drupal_add_library('system', 'drupal.collapse');
+$image_dir = '/pub/analysis/wish/image/';
+$image_count = count($results['images']);
+$gene_count = count($results['genes']);
+$exp_title = $results['pub']['title'];
+
 function partition( $list, $p ) {
     $listlen = count( $list );
     $partlen = floor( $listlen / $p );
@@ -14,6 +20,49 @@ function partition( $list, $p ) {
     }
     return $partition;
 }
+
+$columns_script = <<<EOD
+<script>
+
+// Get the elements with class="column"
+
+
+// Declare a "loop" variable
+var i;
+
+// Full-width images
+function one(type) {
+    var elements = document.getElementsByClassName(type);
+    for (i = 0; i < elements.length; i++) {
+        elements[i].style.flex = "100%";
+    }
+}
+
+// Two images side by side
+function two(type) {
+    var elements = document.getElementsByClassName(type);
+    for (i = 0; i < elements.length; i++) {
+        elements[i].style.flex = "40%";
+    }
+}
+
+// Four images side by side
+function four(type) {
+    var elements = document.getElementsByClassName(type);
+    for (i = 0; i < elements.length; i++) {
+        elements[i].style.flex = "20%";
+    }
+}
+var btns = document.getElementsByClassName("btn");
+for (var i = 0; i < btns.length; i++) {
+  btns[i].addEventListener("click", function() {
+  var current = document.getElementsByClassName("active");
+  current[0].className = current[0].className.replace(" active", "");
+  this.className += " active";
+});
+ }
+</script>
+EOD
 
 
 $script = <<<EOD
@@ -150,16 +199,7 @@ $content = "<H2>Something</H2>
 $table_content
 ";
 print $content;            
-}elseif($id == 'experiment_byGene')
-{
-
-drupal_add_library('system', 'drupal.collapse');
-$image_dir = '/pub/analysis/wish/image/';
-$image_count = count($results['images']);
-$gene_count = count($results['genes']);
-$exp_title = $results['pub']['title'];
-
-
+}elseif($id == 'experiment_byGene'){
 
 
 $content =  ' <a class="waves-effect waves-light btn" onClick="expandAll();">Expand All</a> 
@@ -171,48 +211,8 @@ $content .= "
 <br><hr>
 ";
 
-$content .= '
-<script>
+$content .= $columns_script;
 
-// Get the elements with class="column"
-
-
-// Declare a "loop" variable
-var i;
-
-// Full-width images
-function one(type) {
-    var elements = document.getElementsByClassName(type);
-    for (i = 0; i < elements.length; i++) {
-        elements[i].style.flex = "100%";
-    }
-}
-
-// Two images side by side
-function two(type) {
-    var elements = document.getElementsByClassName(type);
-    for (i = 0; i < elements.length; i++) {
-        elements[i].style.flex = "40%";
-    }
-}
-
-// Four images side by side
-function four(type) {
-    var elements = document.getElementsByClassName(type);
-    for (i = 0; i < elements.length; i++) {
-        elements[i].style.flex = "20%";
-    }
-}
-var btns = document.getElementsByClassName("btn");
-for (var i = 0; i < btns.length; i++) {
-  btns[i].addEventListener("click", function() {
-  var current = document.getElementsByClassName("active");
-  current[0].className = current[0].className.replace(" active", "");
-  this.className += " active";
-});
- }
-</script>
-';
 
 $content .= "<h2> Images($image_count) By Gene($gene_count)</h2>";
 $content .= '
@@ -278,8 +278,7 @@ $content .= "<p><a href=\"#top\">back to top</a></p><br>";
 print $content;
 
 
-}elseif($id == 'experiment_byTerm')
-{
+}elseif($id == 'experiment_byTerm'){
   print "hi";
 }elseif($id == 'experiment_all')
 {
