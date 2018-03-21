@@ -88,7 +88,7 @@ function tripal_expression_cvterm_organism_getExperiment_overview($results){
 	return $content; 
 
 }
-function tripal_expression_cvterm_organism_getExperiment_byGene($results){
+function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_count,$gene_count){
 	$content =  ' <a class="waves-effect waves-light btn" onClick="expandAll();">Expand All</a> 
 	  <a class="waves-effect waves-light btn" onClick="collapseAll();">Collapse All</a>
 	<br /><br />';
@@ -286,7 +286,7 @@ if ($id == 'experiment_overview'){
   $content = tripal_expression_cvterm_organism_getExperiment_overview($results);
   print $content;           
 }elseif($id == 'experiment_byGene'){
-  $content = tripal_expression_cvterm_organism_getExperiment_byGene($results);
+  $content = tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_count,$gene_count);
   print $content;
 
 
