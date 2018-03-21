@@ -239,7 +239,11 @@ foreach ($results['genes'] as $feature){
  foreach ($feature['eimage_id'] as $eimage_id){
     $uri = $results['images'][$eimage_id]['image_uri'];
     $expression_id = $results['images'][$eimage_id]['expression_id'];
-    $terms_array = $results['expressions'][$expression_id]['cvterm_id'];
+    $terms_id_array = $results['expressions'][$expression_id]['cvterm_id'];
+    $terms_array = array();
+    foreach ($terms_id_array as $term_id){
+      $terms_array[] = $results['terms'][$term_id]['name'];
+    }
     $terms = "All terms tagged in this image: " . join(', ', $terms_array);
     $all_genes_array = array();
     foreach($results['expressions'][$expression_id]['feature_id'] as $other_feature){
@@ -250,7 +254,7 @@ foreach ($results['genes'] as $feature){
     $all_genes = "All genes tagged in this image: " . join(', ', $all_genes_array);
     $caption = "$all_genes<br>$terms";
     $caption .=  "<br>". $results['expressions'][$expression_id]['description'];
-    $images[] = "<div class=\"caption_container\"><a href=\"$image_dir/$image\"><img style=\"width:100%\" class=\"caption_image\" src=\"$image_dir/$uri\" ></a><div class=\"caption_middle\"><div class=\"caption_text\">$caption</div></div></div>";
+    $images[] = "<div class=\"caption_container\"><a href=\"$image_dir/$uri\"><img style=\"width:100%\" class=\"caption_image\" src=\"$image_dir/$uri\" ></a><div class=\"caption_middle\"><div class=\"caption_text\">$caption</div></div></div>";
  }
  $each_image_count = count($images);
   $columns = partition($images,4);
