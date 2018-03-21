@@ -276,7 +276,7 @@ dpm($wordcloud_words);
 $wordcloud = <<<EOD
 <script>
 
-var word_freqs = [$wordcloud_words];
+var word_freqs = [{$wordcloud_words}];
 var fill = d3.scale.linear()
     .domain([0, 6])
     .range(["#def2d9", "#469834"]);
@@ -314,7 +314,7 @@ function draw(words) {
 </script>
 EOD;
 
-	return $content, $wordcloud;
+	return array($content, $wordcloud);
 }
 
 function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_count,$term_count,$image_dir){
@@ -512,7 +512,7 @@ if ($id == 'experiment_overview'){
   $content = tripal_expression_cvterm_organism_getExperiment_overview($results);
   print $content;           
 }elseif($id == 'experiment_byGene'){
-  ($wordcloud_stuff,$content) = tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_count,$gene_count,$image_dir);
+  list ($wordcloud_stuff,$content) = tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_count,$gene_count,$image_dir);
   print $content;
 print $wordcloud_stuff;
 
