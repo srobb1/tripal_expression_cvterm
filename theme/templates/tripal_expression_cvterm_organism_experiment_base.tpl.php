@@ -188,7 +188,7 @@ function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_
 	<br><hr>
 	";
 
-	$content .= $columns_script;
+	//$content .= $columns_script;
 
 
 	$content .= "<h2> Images($image_count) By Gene($gene_count)</h2>";
@@ -269,7 +269,7 @@ function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_
 	<br><hr>
 	";
 
-	$content .= $columns_script;
+	//$content .= $columns_script;
 
 
 	$content .= "<h2> Images($image_count) By Term($term_count)</h2>";
@@ -344,6 +344,9 @@ function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_
 
 
 print $script;
+print $columns_script;
+
+
 
 print '
 <div id="tripal_chado_expression_cvterm_organism_contents" class="tripal-contents">
