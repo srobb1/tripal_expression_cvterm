@@ -8,6 +8,95 @@ $gene_count = count($results['genes']);
 $term_count = count($results['terms']);
 $exp_title = $results['pub']['title'];
 
+
+$columns_script = <<<EOD
+<script>
+
+// Get the elements with class="column"
+
+
+// Declare a "loop" variable
+var i;
+
+// Full-width images
+function one(type) {
+    var elements = document.getElementsByClassName(type);
+    for (i = 0; i < elements.length; i++) {
+        elements[i].style.flex = "100%";
+    }
+}
+
+// Two images side by side
+function two(type) {
+    var elements = document.getElementsByClassName(type);
+    for (i = 0; i < elements.length; i++) {
+        elements[i].style.flex = "40%";
+    }
+}
+
+// Four images side by side
+function four(type) {
+    var elements = document.getElementsByClassName(type);
+    for (i = 0; i < elements.length; i++) {
+        elements[i].style.flex = "20%";
+    }
+}
+var btns = document.getElementsByClassName("btn");
+for (var i = 0; i < btns.length; i++) {
+  btns[i].addEventListener("click", function() {
+  var current = document.getElementsByClassName("active");
+  current[0].className = current[0].className.replace(" active", "");
+  this.className += " active";
+});
+ }
+</script>
+EOD;
+
+
+$script = <<<EOD
+  <script type="text/javascript">
+    // We do not use Drupal Behaviors because we do not want this
+    // code to be executed on AJAX callbacks. This code only needs to 
+    // be executed once the page is ready.
+    jQuery(document).ready(function($){
+
+      // Hide all but the first data pane 
+      $(".tripal-data-pane").hide().filter(":first-child").show();
+  
+      // When a title in the table of contents is clicked, then 
+      // show the corresponding item in the details box 
+      $(".tripal_toc_list_item_link").click(function(){
+        var id = $(this).attr('id') + "-tripal-data-pane";
+        $(".tripal-data-pane").hide().filter("#"+ id).fadeIn('fast');
+        return false;
+      });
+  
+      // If a ?pane= is specified in the URL then we want to show the
+      // requested content pane. For previous version of Tripal,
+      // ?block=, was used.  We support it here for backwards
+      // compatibility
+      var pane;
+      pane = window.location.href.match(/[\?|\&]pane=(.+?)[\&|\#]/)
+      if (pane == null) {
+        pane = window.location.href.match(/[\?|\&]pane=(.+)/)
+      }
+      // if we don't have a pane then try the old style ?block=
+      if (pane == null) {
+        pane = window.location.href.match(/[\?|\&]block=(.+?)[\&|\#]/)
+        if (pane == null) {
+          pane = window.location.href.match(/[\?|\&]block=(.+)/)
+        }
+      }
+      if(pane != null){
+        $(".tripal-data-pane").hide().filter("#" + pane[1] + "-tripal-data-pane").show();
+      }
+      // Remove the 'active' class from the links section, as it doesn't
+      // make sense for this layout
+      $("a.active").removeClass('active');
+    });
+  </script>
+EOD;
+
 function partition( $list, $p ) {
     $listlen = count( $list );
     $partlen = floor( $listlen / $p );
@@ -252,93 +341,7 @@ function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_
 }
 
 
-$columns_script = <<<EOD
-<script>
 
-// Get the elements with class="column"
-
-
-// Declare a "loop" variable
-var i;
-
-// Full-width images
-function one(type) {
-    var elements = document.getElementsByClassName(type);
-    for (i = 0; i < elements.length; i++) {
-        elements[i].style.flex = "100%";
-    }
-}
-
-// Two images side by side
-function two(type) {
-    var elements = document.getElementsByClassName(type);
-    for (i = 0; i < elements.length; i++) {
-        elements[i].style.flex = "40%";
-    }
-}
-
-// Four images side by side
-function four(type) {
-    var elements = document.getElementsByClassName(type);
-    for (i = 0; i < elements.length; i++) {
-        elements[i].style.flex = "20%";
-    }
-}
-var btns = document.getElementsByClassName("btn");
-for (var i = 0; i < btns.length; i++) {
-  btns[i].addEventListener("click", function() {
-  var current = document.getElementsByClassName("active");
-  current[0].className = current[0].className.replace(" active", "");
-  this.className += " active";
-});
- }
-</script>
-EOD;
-
-
-$script = <<<EOD
-  <script type="text/javascript">
-    // We do not use Drupal Behaviors because we do not want this
-    // code to be executed on AJAX callbacks. This code only needs to 
-    // be executed once the page is ready.
-    jQuery(document).ready(function($){
-
-      // Hide all but the first data pane 
-      $(".tripal-data-pane").hide().filter(":first-child").show();
-  
-      // When a title in the table of contents is clicked, then 
-      // show the corresponding item in the details box 
-      $(".tripal_toc_list_item_link").click(function(){
-        var id = $(this).attr('id') + "-tripal-data-pane";
-        $(".tripal-data-pane").hide().filter("#"+ id).fadeIn('fast');
-        return false;
-      });
-  
-      // If a ?pane= is specified in the URL then we want to show the
-      // requested content pane. For previous version of Tripal,
-      // ?block=, was used.  We support it here for backwards
-      // compatibility
-      var pane;
-      pane = window.location.href.match(/[\?|\&]pane=(.+?)[\&|\#]/)
-      if (pane == null) {
-        pane = window.location.href.match(/[\?|\&]pane=(.+)/)
-      }
-      // if we don't have a pane then try the old style ?block=
-      if (pane == null) {
-        pane = window.location.href.match(/[\?|\&]block=(.+?)[\&|\#]/)
-        if (pane == null) {
-          pane = window.location.href.match(/[\?|\&]block=(.+)/)
-        }
-      }
-      if(pane != null){
-        $(".tripal-data-pane").hide().filter("#" + pane[1] + "-tripal-data-pane").show();
-      }
-      // Remove the 'active' class from the links section, as it doesn't
-      // make sense for this layout
-      $("a.active").removeClass('active');
-    });
-  </script>
-EOD;
 
 print $script;
 
