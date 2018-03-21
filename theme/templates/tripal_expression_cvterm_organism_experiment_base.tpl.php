@@ -512,7 +512,7 @@ if ($id == 'experiment_overview'){
   $content = tripal_expression_cvterm_organism_getExperiment_overview($results);
   print $content;           
 }elseif($id == 'experiment_byGene'){
-  $content = tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_count,$gene_count,$image_dir);
+  ($wordcloud_stuff,$content) = tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_count,$gene_count,$image_dir);
   print $content;
 print $wordcloud_stuff;
 
