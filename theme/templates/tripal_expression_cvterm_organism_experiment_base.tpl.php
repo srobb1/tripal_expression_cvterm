@@ -9,20 +9,12 @@ $term_count = count($results['terms']);
 $exp_title = $results['pub']['title'];
 
 $btn_script = <<<EOD
-// Get the container element
-var btnContainer = document.getElementById("gallery_btns");
-
-// Get all buttons with class="btn" inside the container
-var btns = btnContainer.getElementsByClassName("btn");
-
-// Loop through the buttons and add the active class to the current/clicked button
-for (var i = 0; i < btns.length; i++) {
-  btns[i].addEventListener("click", function() {
-    var current = document.getElementsByClassName("active");
-    current[0].className = current[0].className.replace(" active", "");
-    this.className += " active";
-  });
-}
+<script>
+$("#gallery_btns .btn").on('click', function(){
+    $(this).siblings().removeClass('active')
+    $(this).addClass('active');
+})
+</script>
 EOD;
 
 $columns_script = <<<EOD
