@@ -443,6 +443,7 @@ function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_
 	}
 
 	$content .= "<p><a href=\"#top\">back to top</a></p><br>";
+	$content .= $btn_script;
 	return $content;
 }
 
