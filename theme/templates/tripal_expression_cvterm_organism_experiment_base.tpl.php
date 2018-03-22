@@ -317,7 +317,7 @@ function draw(words) {
       .text(function(d) { return d.text; })
         .append("span")
           .attr("class","tooltiptext")
-          .text(this_word);
+          .text(words_array[this_word]);
 }
 </script>
 EOD;
