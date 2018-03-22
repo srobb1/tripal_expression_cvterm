@@ -312,14 +312,14 @@ d3.select("#wordcloud").append("svg")
     .selectAll("text")
       .data(words)
     .enter().append("text")
-       .attr('xlink:href',"http://google.com")
+       
       .style("font-size", function(d) { return d.size + "px"; })
       .style("font-family", "Impact")
       .style("fill", function(d, i) { return fill(i); })
       .attr("text-anchor", "middle")
       .attr("transform", function(d) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-      })
+      }).append("a").attr('xlink:href',"http://google.com")
       .text(function(d) { return d.text; })
       .on("mouseover", function(d){
          div.transition()		
