@@ -247,7 +247,7 @@ function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_
 	 $columns = partition($images,4);
 	 $content .= '
 	 <fieldset class=" collapsible collapsed">
-	 <legend><span class="fieldset-legend">' . $name . " [" . $uniquename . "] ($each_image_count)" . '</span></legend>
+	 <legend><span class="fieldset-legend"><a name=".$uniquename.">' . $name . " [" . $uniquename . "] ($each_image_count)" . '</a></span></legend>
 	 <div class="fieldset-wrapper"> ' ;
 
 	 $content .= '<div class="row"> ';
@@ -319,7 +319,7 @@ d3.select("#wordcloud").append("svg")
       .attr("text-anchor", "middle")
       .attr("transform", function(d) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-      }).append("a").attr('xlink:href',"http://google.com")
+      }).append("a").attr('xlink:href','#'+d.text)
       .text(function(d) { return d.text; })
       .on("mouseover", function(d){
          div.transition()		
