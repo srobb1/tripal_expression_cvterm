@@ -363,7 +363,7 @@ EOD;
 	return  $content;
 }
 
-function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_count,$term_count,$image_dir){
+function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_count,$term_count,$image_dir,$btn_script){
 	$content =  ' <a class="waves-effect waves-light btn" onClick="expandAll();">Expand All</a> 
 	  <a class="waves-effect waves-light btn" onClick="collapseAll();">Collapse All</a>
 	<br /><br />';
@@ -567,7 +567,7 @@ if ($id == 'experiment_overview'){
 
 
 }elseif($id == 'experiment_byTerm'){
-  $content = tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_count,$term_count,$image_dir);
+  $content = tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_count,$term_count,$image_dir,$btn_script);
   print $content;
 }elseif($id == 'experiment_all'){
   $content = tripal_expression_cvterm_organism_getExperiment_all($results,$image_count,$exp_title,$image_dir);
