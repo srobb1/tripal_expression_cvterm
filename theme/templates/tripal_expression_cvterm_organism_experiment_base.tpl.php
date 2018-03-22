@@ -319,7 +319,7 @@ d3.select("#wordcloud").append("svg")
       .attr("text-anchor", "middle")
       .attr("transform", function(d) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-      }).append("a").attr('xlink:href', ('#'+ d.text))
+      }).append("a").attr('xlink:href', ('#'+ function(d) { return d.text; }))
       .text(function(d) { return d.text; })
       .on("mouseover", function(d){
          div.transition()		
