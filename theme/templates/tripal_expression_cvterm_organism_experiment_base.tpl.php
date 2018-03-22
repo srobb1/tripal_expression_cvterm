@@ -314,6 +314,7 @@ function draw(words) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
       })
       .text(function(d) { return d.text; })
+      .attr("class","tooltip")
         .append("span")
           .attr("class","tooltiptext")
           .text(function(d) { return words_array[d.text]; });
