@@ -298,6 +298,13 @@ var layout = d3.layout.cloud()
 layout.start();
 
 function draw(words) {
+var tooltip = d3.select("body")
+    .append("div")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden")
+    .text("a simple tooltip");
+
   d3.select("#wordcloud").append("svg")
       .attr("width", layout.size()[0])
       .attr("height", layout.size()[1])
@@ -313,14 +320,11 @@ function draw(words) {
       .attr("transform", function(d) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
       })
-      .text(function(d) { return d.text; });
-      
-         $('text').tipsy({ 
-        gravity: 'w', 
-        html: true, 
-        title: function() {
-    
-          return function(d) { return words_array[d.text]; } ;        }
+      .text(function(d) { return d.text; })
+         	.on("mouseover", function(){return tooltip.style("visibility", "visible");})
+	.on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+   
       });
 }
 </script>
