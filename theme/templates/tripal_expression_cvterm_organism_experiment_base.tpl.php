@@ -8,6 +8,22 @@ $gene_count = count($results['genes']);
 $term_count = count($results['terms']);
 $exp_title = $results['pub']['title'];
 
+$btn_script = <<<EOD
+// Get the container element
+var btnContainer = document.getElementById("gallery_btns");
+
+// Get all buttons with class="btn" inside the container
+var btns = btnContainer.getElementsByClassName("btn");
+
+// Loop through the buttons and add the active class to the current/clicked button
+for (var i = 0; i < btns.length; i++) {
+  btns[i].addEventListener("click", function() {
+    var current = document.getElementsByClassName("active");
+    current[0].className = current[0].className.replace(" active", "");
+    this.className += " active";
+  });
+}
+EOD;
 
 $columns_script = <<<EOD
 <script>
@@ -275,6 +291,7 @@ function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_
     $wordcloud_words = join(',',$wordcloud_array);
     dpm($wordcloud_words);
     $hoover_str = '{' . join("," , $wordcloud_hoover) . ' }';
+
     $wordcloud = <<<EOD
 <script>
 var words_array = {$hoover_str};
@@ -361,10 +378,12 @@ function tripal_expression_cvterm_organism_getExperiment_byTerm($results,$image_
 
 	$content .= "<h2> Images($image_count) By Term($term_count)</h2>";
 	$content .= '
+    <div id="gallery_btns">
 	  <p>Click on the buttons to change the grid view.</p>
 	  <button class="btn" onclick="one(\'term_column\')">1</button>
 	  <button class="btn active" onclick="two(\'term_column\')">2</button>
 	  <button class="btn" onclick="four(\'term_column\')">4</button>
+	</div>
 	<br><br>
 	';
 
