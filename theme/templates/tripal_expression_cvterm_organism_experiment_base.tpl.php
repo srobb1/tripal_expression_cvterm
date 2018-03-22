@@ -298,8 +298,6 @@ var layout = d3.layout.cloud()
 layout.start();
 
 function draw(words) {
-  var this_word = function(d) { return d.text; };
-  var word_hoover = words_array[this_word];
   d3.select("#wordcloud").append("svg")
       .attr("width", layout.size()[0])
       .attr("height", layout.size()[1])
@@ -318,7 +316,7 @@ function draw(words) {
       .text(function(d) { return d.text; })
         .append("span")
           .attr("class","tooltiptext")
-          .text(word_hoover);
+          .text(function(d) { return words_array[d.text]; });
 }
 </script>
 EOD;
