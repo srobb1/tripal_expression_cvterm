@@ -313,9 +313,15 @@ function draw(words) {
       .attr("transform", function(d) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
       })
-      .text(function(d) { return d.text; })
-        .append("svg:title")
-        .text(function(d) { return words_array[d.text]; });
+      .text(function(d) { return d.text; });
+      
+         $('text').tipsy({ 
+        gravity: 'w', 
+        html: true, 
+        title: function() {
+    
+          return function(d) { return words_array[d.text]; } ;        }
+      });
 }
 </script>
 EOD;
