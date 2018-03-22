@@ -302,7 +302,7 @@ layout.start();
 function draw(words) {
 
 
-  d3.select("#wordcloud").append("svg")
+  var svg_wordcoud = d3.select("#wordcloud").append("svg")
       .attr("width", layout.size()[0])
       .attr("height", layout.size()[1])
     .append("g")
@@ -327,7 +327,7 @@ function handleMouseOver(d) {  // Add interactivity
           
 
             // Specify where to put label of text
-            svg.append("text").attr({
+            svg_wordcoud.append("text").attr({
                id: "t" + function(d) { return d.text; },  // Create an id for text so we can select it later for removing on mouseout
                 x: function() { return xScale(d.x) - 30; },
                 y: function() { return yScale(d.y) - 15; }
