@@ -101,6 +101,9 @@ EOD;
 drupal_add_js(drupal_get_path('module', 'tripal_expression_cvterm_organism') . '/theme/js/d3.v3.min.js');
 //drupal_add_js(drupal_get_path('module', 'tripal_expression_cvterm_organism') . '/theme/js/d3-cloud/build/d3.layout.cloud.js');
 drupal_add_js(drupal_get_path('module', 'tripal_expression_cvterm_organism') . '/theme/js/d3.layout.cloud.js');
+
+drupal_add_js(drupal_get_path('module', 'tripal_expression_cvterm_organism') . 'theme/js/jquery.tipsy.js')
+
 //drupal_add_js(drupal_get_path('module', 'tripal_expression_cvterm_organism') . '/theme/js/d3-cloud/examples/browserify.js');
 
 
