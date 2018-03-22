@@ -319,12 +319,12 @@ d3.select("#wordcloud").append("svg")
       .attr("transform", function(d) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
       })
-      .text(function(d) { return d.text; })
+      .text(function(d) { return d.text; }).append("a").attr('xlink:href',"http://google.com")
       .on("mouseover", function(d){
          div.transition()		
                 .duration(200)		
                 .style("opacity", .9);
-        div.html(words_aray[d.text])
+        div.html(words_array[d.text])
                 .style("left", (d3.event.pageX) + "px")		
                 .style("top", (d3.event.pageY - 28) + "px");	
       })
