@@ -242,7 +242,7 @@ function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_
 		$images[] = "<div class=\"caption_container\"><a href=\"$image_dir/$uri\"><img style=\"width:100%\" class=\"caption_image\" src=\"$image_dir/$uri\" ></a><div class=\"caption_middle\"><div class=\"caption_text\">$caption</div></div></div>";
 	 }
 	 $each_image_count = count($images);
-	 $wordcloud_array[]="{\"text\":\"$name\",\"size\":$each_image_count}";
+	 $wordcloud_array[]="{\"text\":\"$uniquename\",\"size\":$each_image_count}";
 	 $columns = partition($images,4);
 	 $content .= '
 	 <fieldset class=" collapsible collapsed">
@@ -277,17 +277,19 @@ $wordcloud = <<<EOD
 <script>
 
 var word_freqs = [{$wordcloud_words}];
+word_freqs.sort(function(a,b) { return parseFloat(b.freq) - parseFloat(a.freq) } );  
 var fill = d3.scale.linear()
-    .domain([0, 6])
+    .domain([0, 19])
     .range(["#def2d9", "#469834"]);
 
 var layout = d3.layout.cloud()
-    .size([500, 500])
+    .size([800,500])
     .words(word_freqs)
-    .padding(5)
+    .padding(0)
     .rotate(function() { return ~~(Math.random() * 2) * 90; })
     .font("Impact")
-    .fontSize(function(d) { return d.size; })
+    //.fontSize(24)
+    .fontSize(function(d) { return d.size*5; })
     .on("end", draw);
 
 
@@ -309,7 +311,10 @@ function draw(words) {
       .attr("transform", function(d) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
       })
-      .text(function(d) { return d.text; });
+      .text(function(d) { return d.text; })
+        .append("span")
+          .attr("class","tooltiptext")
+          .text("text");
 }
 </script>
 EOD;
