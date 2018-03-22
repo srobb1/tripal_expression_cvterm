@@ -296,27 +296,7 @@ var layout = d3.layout.cloud()
 
 
 layout.start();
-function handleMouseOver(d) {  // Add interactivity
 
-          
-
-            // Specify where to put label of text
-            svg.append("text").attr({
-               id: "t" + function(d) { return d.text; },  // Create an id for text so we can select it later for removing on mouseout
-                x: function() { return xScale(d.x) - 30; },
-                y: function() { return yScale(d.y) - 15; }
-            })
-            .text(function() {
-              return function(d) { return d.text; };  // Value of the text
-            });
-          }
-
-      function handleMouseOut(d) {
-           
-
-            // Select text by id and then remove
-            d3.select("#t" + function(d) { return d.text; }).remove();  // Remove text location
-          }
 
 
 function draw(words) {
@@ -342,7 +322,27 @@ function draw(words) {
       .on("mouseout", handleMouseOut);
        ;
       
+function handleMouseOver(d) {  // Add interactivity
 
+          
+
+            // Specify where to put label of text
+            svg.append("text").attr({
+               id: "t" + function(d) { return d.text; },  // Create an id for text so we can select it later for removing on mouseout
+                x: function() { return xScale(d.x) - 30; },
+                y: function() { return yScale(d.y) - 15; }
+            })
+            .text(function() {
+              return function(d) { return d.text; };  // Value of the text
+            });
+          }
+
+      function handleMouseOut(d) {
+           
+
+            // Select text by id and then remove
+            d3.select("#t" + function(d) { return d.text; }).remove();  // Remove text location
+          }
    
 
 }
