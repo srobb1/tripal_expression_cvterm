@@ -300,15 +300,7 @@ layout.start();
 
 
 function draw(words) {
- var margin = { top: 40, right: 20, bottom: 20, left: 40 };
- var xScale = d3.scale.linear()
-          .domain([0, d3.max(dataset, function (d) { return d.x + 10; })])
-          .range([margin.left, layout.size[0] - margin.right]);  // Set margins for x specific
 
-      // We're passing in a function in d3.max to tell it what we're maxing (y value)
- var yScale = d3.scale.linear()
-          .domain([0, d3.max(dataset, function (d) { return d.y + 10; })])
-          .range([margin.top, layout.size[1] - margin.bottom]);  // Set margins for y specific
   var svg_wordcoud = d3.select("#wordcloud").append("svg")
       .attr("width", layout.size()[0])
       .attr("height", layout.size()[1])
@@ -325,32 +317,20 @@ function draw(words) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
       })
       .text(function(d) { return d.text; })
-      .on("mouseover", handleMouseOver)
-      .on("mouseout", handleMouseOut);
+      .on("mouseover", function(d){
+         div.transition()		
+                .duration(200)		
+                .style("opacity", .9);
+        div.html(d.text)
+      })
+      .on("mouseout", function(d){
+           div.transition()		
+                .duration(500)		
+                .style("opacity", 0);	
+      });
        ;
       
-function handleMouseOver(d) {  // Add interactivity
 
-          
-
-            // Specify where to put label of text
-            svg_wordcoud.append("text").attr({
-               id: "t" +  d.text,  // Create an id for text so we can select it later for removing on mouseout
-                x: function() { return xScale(d.x) - 30; },
-                y: function() { return yScale(d.y) - 15; }
-            })
-            .text(function() {
-              return d.text;  // Value of the text
-            });
-          }
-
-      function handleMouseOut(d) {
-           
-
-            // Select text by id and then remove
-            d3.select("#t" +  d.text).remove();  // Remove text location
-          }
-   
 
 }
 </script>
