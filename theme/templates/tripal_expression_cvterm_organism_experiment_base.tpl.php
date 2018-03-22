@@ -219,7 +219,7 @@ function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_
 	foreach ($results['genes'] as $item){
 	  $name = $item['name'];
 	  $uniquename = $item['uniquename'];
-      $wordcloud_hoover[$uniquename] = "$uniquename: $name";
+      $wordcloud_hoover[] = "\"$uniquename\" : \"$uniquename: $name\"";
 	  $images = array();
 
 	 foreach ($item['eimage_id'] as $eimage_id){
@@ -274,9 +274,10 @@ function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_
 	$content .= "<p><a href=\"#top\">back to top</a></p><br>";
     $wordcloud_words = join(',',$wordcloud_array);
     dpm($wordcloud_words);
+    $hoover_str = '{' . join("," , $wordcloud_hoover) . ' }';
     $wordcloud = <<<EOD
 <script>
-
+var words_array = {$hoover_str};
 var word_freqs = [{$wordcloud_words}];
 word_freqs.sort(function(a,b) { return parseFloat(b.freq) - parseFloat(a.freq) } );  
 var fill = d3.scale.linear()
@@ -315,7 +316,7 @@ function draw(words) {
       .text(function(d) { return d.text; })
         .append("span")
           .attr("class","tooltiptext")
-          .text({$wordcloud_hoover[function(d) { return d.text; }]});
+          .text("text");
 }
 </script>
 EOD;
