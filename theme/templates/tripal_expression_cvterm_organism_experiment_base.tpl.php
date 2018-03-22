@@ -99,12 +99,9 @@ EOD;
 
 //drupal_add_js(drupal_get_path('module', 'tripal_expression_cvterm_organism') . '/theme/js/d3.v4.min.js');
 drupal_add_js(drupal_get_path('module', 'tripal_expression_cvterm_organism') . '/theme/js/d3.v3.min.js');
-//drupal_add_js(drupal_get_path('module', 'tripal_expression_cvterm_organism') . '/theme/js/d3-cloud/build/d3.layout.cloud.js');
 drupal_add_js(drupal_get_path('module', 'tripal_expression_cvterm_organism') . '/theme/js/d3.layout.cloud.js');
 
-drupal_add_js(drupal_get_path('module', 'tripal_expression_cvterm_organism') . 'theme/js/jquery.tipsy.js');
 
-//drupal_add_js(drupal_get_path('module', 'tripal_expression_cvterm_organism') . '/theme/js/d3-cloud/examples/browserify.js');
 
 
 
@@ -299,6 +296,28 @@ var layout = d3.layout.cloud()
 
 
 layout.start();
+function handleMouseOver(d) {  // Add interactivity
+
+          
+
+            // Specify where to put label of text
+            svg.append("text").attr({
+               id: "t" + function(d) { return d.text; },  // Create an id for text so we can select it later for removing on mouseout
+                x: function() { return xScale(d.x) - 30; },
+                y: function() { return yScale(d.y) - 15; }
+            })
+            .text(function() {
+              return function(d) { return d.text; };  // Value of the text
+            });
+          }
+
+      function handleMouseOut(d) {
+           
+
+            // Select text by id and then remove
+            d3.select("#t" + function(d) { return d.text; }).remove();  // Remove text location
+          }
+
 
 function draw(words) {
 
@@ -318,18 +337,14 @@ function draw(words) {
       .attr("transform", function(d) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
       })
-      .text(function(d) { return d.text; });
+      .text(function(d) { return d.text; })
+      .on("mouseover", handleMouseOver)
+      .on("mouseout", handleMouseOut);
+       ;
       
-           $('text').tipsy({ 
-        gravity: 'w', 
-        html: true, 
-        title: function() {
-          var d = this.__data__, c = colors(d.i);
-          return function(d) { return words_array[d.text]; } ; 
-        }
-      });
+
    
-      });
+
 }
 </script>
 EOD;
