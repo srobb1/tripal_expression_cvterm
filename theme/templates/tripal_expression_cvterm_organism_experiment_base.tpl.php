@@ -247,7 +247,7 @@ function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_
 	 $columns = partition($images,4);
 	 $content .= '
 	 <fieldset class=" collapsible collapsed">
-	 <legend><span class="fieldset-legend"><a name=".$uniquename.">' . $name . " [" . $uniquename . "] ($each_image_count)" . '</a></span></legend>
+	 <legend><span class="fieldset-legend"><a name="'.$uniquename.'">' . $name . " [" . $uniquename . "] ($each_image_count)" . '</a></span></legend>
 	 <div class="fieldset-wrapper"> ' ;
 
 	 $content .= '<div class="row"> ';
