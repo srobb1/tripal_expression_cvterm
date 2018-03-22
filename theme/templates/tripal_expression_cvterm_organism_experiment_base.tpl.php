@@ -300,8 +300,11 @@ layout.start();
 
 
 function draw(words) {
+var div = d3.select("#wordcloud").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
 
-  var svg_wordcoud = d3.select("#wordcloud").append("svg")
+d3.select("#wordcloud").append("svg")
       .attr("width", layout.size()[0])
       .attr("height", layout.size()[1])
     .append("g")
