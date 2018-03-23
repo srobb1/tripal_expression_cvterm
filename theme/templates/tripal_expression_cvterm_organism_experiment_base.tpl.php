@@ -339,7 +339,8 @@ d3.select("#wordcloud").append("svg")
       .on("mouseout", function(d){
            div.transition()		
                 .duration(500)		
-                .style("opacity", 0);	
+                .style("opacity", 0)
+  .style("fill", function(d, i) { return fill(i); });
       });
        ;
       
