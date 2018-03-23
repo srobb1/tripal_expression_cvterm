@@ -49,14 +49,7 @@ function four(type) {
         elements[i].style.flex = "20%";
     }
 }
-var btns = document.getElementsByClassName("btn");
-for (var i = 0; i < btns.length; i++) {
-  btns[i].addEventListener("click", function() {
-  var current = document.getElementsByClassName("active");
-  current[0].className = current[0].className.replace(" active", "");
-  this.className += " active";
-});
- }
+
 </script>
 EOD;
 
@@ -215,10 +208,12 @@ function tripal_expression_cvterm_organism_getExperiment_byGene($results,$image_
 	$content .= "<h2> Images($image_count) By Gene($gene_count)</h2>";
         $content .= '<div id="wordcloud"></div>';
 	$content .= '
+     <div id="gallery_btns">
 	  <p>Click on the buttons to change the grid view.</p>
 	  <button class="btn" onclick="one(\'gene_column\')">1</button>
 	  <button class="btn active" onclick="two(\'gene_column\')">2</button>
 	  <button class="btn" onclick="four(\'gene_column\')">4</button>
+	</div>
 	<br><br>
 	';
 
@@ -328,7 +323,10 @@ d3.select("#wordcloud").append("svg")
       .attr("text-anchor", "middle")
       .attr("transform", function(d) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-      }).append("a").attr('xlink:href', function(d) { return "#" + d.text; })
+      })
+      .append("a")
+         .attr('xlink:href', function(d) { return "#" + d.text; })
+         .attr("class","wordcould_link")
       .text(function(d) { return d.text; })
       .on("mouseover", function(d){
          div.transition()		
@@ -454,10 +452,12 @@ function tripal_expression_cvterm_organism_getExperiment_all($results,$image_cou
 
 	$content .= "<h2> Images($image_count)</h2>";
 	$content .= '
+  <div id="gallery_btns">
 	  <p>Click on the buttons to change the grid view.</p>
 	  <button class="btn" onclick="one(\'gene_column\')">1</button>
 	  <button class="btn active" onclick="two(\'gene_column\')">2</button>
 	  <button class="btn" onclick="four(\'gene_column\')">4</button>
+ </div>
 	<br><br>
 	';
 
