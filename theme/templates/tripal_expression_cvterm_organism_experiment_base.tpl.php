@@ -327,7 +327,7 @@ d3.select("#wordcloud").append("svg")
       .append("a")
          .attr('xlink:href', function(d) { return "#" + d.text; })
          .attr("class","wordcloud_link")
-           .style("fill", function(d, i) { return fill(i); });
+           .style("fill", function(d, i) { return fill(i); })
       .text(function(d) { return d.text; })
       .on("mouseover", function(d){
          div.transition()		
