@@ -326,7 +326,8 @@ d3.select("#wordcloud").append("svg")
       })
       .append("a")
          .attr('xlink:href', function(d) { return "#" + d.text; })
-         .attr("class","wordcould_link")
+         .attr("class","wordcloud_link")
+           .style("fill", function(d, i) { return fill(i); });
       .text(function(d) { return d.text; })
       .on("mouseover", function(d){
          div.transition()		
@@ -340,7 +341,7 @@ d3.select("#wordcloud").append("svg")
            div.transition()		
                 .duration(500)		
                 .style("opacity", 0)
-  .style("fill", function(d, i) { return fill(i); });
+
       });
        ;
       
